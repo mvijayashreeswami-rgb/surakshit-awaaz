@@ -475,7 +475,7 @@
     <div class="c-input-area">
       <div class="c-input-wrap">
         <textarea class="c-textarea" id="cyberInput" placeholder="यहाँ टाइप करें या माइक दबाकर बोलें..." rows="2"></textarea>
-        <div class="c-actions"><button class="c-mic" id="cyberMic" onclick="toggleVoice('cyber')">🎙️ हिंदी में बोलें</button><button class="c-send" id="cyberSend" onclick="sendMsg('cyber')">➤</button></div>
+        <div class="c-actions"><button class="c-mic" id="cyberMic" onclick="requestMicAndStart('cyber')">🎙️ हिंदी में बोलें</button><button class="c-send" id="cyberSend" onclick="sendMsg('cyber')">➤</button></div>
       </div>
       <div class="c-voice-status" id="cyberVoiceStatus"></div>
     </div>
@@ -497,7 +497,7 @@
     <div class="s-input-area">
       <div class="s-input-wrap">
         <textarea class="s-textarea" id="saharaInput" placeholder="यहाँ टाइप करें या माइक दबाकर बोलें..." rows="2"></textarea>
-        <div class="s-actions"><button class="s-mic" id="saharaMic" onclick="toggleVoice('sahara')">🎙️ हिंदी में बोलें</button><button class="s-send" id="saharaSend" onclick="sendMsg('sahara')">➤</button></div>
+        <div class="s-actions"><button class="s-mic" id="saharaMic" onclick="requestMicAndStart('sahara')">🎙️ हिंदी में बोलें</button><button class="s-send" id="saharaSend" onclick="sendMsg('sahara')">➤</button></div>
       </div>
       <div class="s-voice-status" id="saharaVoiceStatus"></div>
     </div>
@@ -514,7 +514,7 @@
 
 <script>
 const GROQ_API_KEY = "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";
-gsk_E95a61f6mIQKLuIB9JKNWGdyb3FYRuSRNJw4zCCuhA1tVhqWOOu
+
 const CYBER_PROMPT = `आप सुरक्षा साथी हैं — एक हिंदी साइबर सुरक्षा सहायक।
 नियम:
 1. हमेशा सरल हिंदी में जवाब दें
@@ -532,8 +532,8 @@ const SAHARA_PROMPT = `आप साहारा हैं — एक हिं�
 5. "आप अकेली नहीं हैं" जैसे शब्द इस्तेमाल करें`;
 
 let cyberHistory=[], saharaHistory=[];
-let cyberRec=null, saharaRec=null;
-let cyberListening=false, saharaListening=false;
+let activeRec=null;
+let currentType=null;
 
 function showPage(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -543,38 +543,95 @@ function showPage(page){
   window.scrollTo(0,0);
 }
 
-function initRec(type){
+function setMicUI(type, state){
+  const mic=document.getElementById(type+'Mic');
+  const status=document.getElementById(type+'VoiceStatus');
+  if(state==='listening'){
+    mic.textContent='⏹️ रोकें';
+    mic.classList.add('listening');
+    status.textContent='🔴 बोलिए...';
+  } else {
+    mic.textContent='🎙️ हिंदी में बोलें';
+    mic.classList.remove('listening');
+  }
+}
+
+async function requestMicAndStart(type){
+  // If already listening, stop
+  if(activeRec && currentType===type){
+    activeRec.stop();
+    activeRec=null;
+    currentType=null;
+    setMicUI(type,'idle');
+    return;
+  }
+
+  const statusEl=document.getElementById(type+'VoiceStatus');
+
+  // Check browser support
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR)return null;
+  if(!SR){
+    statusEl.textContent='⚠️ Chrome browser में खोलें';
+    return;
+  }
+
+  // Request mic permission first
+  try{
+    await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(err){
+    statusEl.textContent='❌ माइक्रोफोन की अनुमति दें';
+    return;
+  }
+
+  // Stop any existing recognition
+  if(activeRec){
+    try{activeRec.stop();}catch(e){}
+    activeRec=null;
+  }
+
+  // Create fresh recognition instance
   const rec=new SR();
-  rec.lang='hi-IN';rec.continuous=false;rec.interimResults=false;
-  rec.onresult=(e)=>{
-    document.getElementById(type+'Input').value=e.results[0][0].transcript;
-    document.getElementById(type+'VoiceStatus').textContent='✅ सुन लिया';
-    stopVoice(type);setTimeout(()=>sendMsg(type),500);
+  rec.lang='hi-IN';
+  rec.continuous=false;
+  rec.interimResults=false;
+  rec.maxAlternatives=1;
+
+  rec.onstart=()=>{
+    setMicUI(type,'listening');
   };
-  rec.onerror=()=>{document.getElementById(type+'VoiceStatus').textContent='❌ दोबारा कोशिश करें';stopVoice(type);};
-  rec.onend=()=>{if(type==='cyber'?cyberListening:saharaListening)stopVoice(type);};
-  return rec;
-}
 
-function toggleVoice(type){type==='cyber'?cyberListening?stopVoice(type):startVoice(type):saharaListening?stopVoice(type):startVoice(type);}
+  rec.onresult=(e)=>{
+    const text=e.results[0][0].transcript;
+    document.getElementById(type+'Input').value=text;
+    statusEl.textContent='✅ सुन लिया!';
+    activeRec=null;
+    currentType=null;
+    setMicUI(type,'idle');
+    setTimeout(()=>sendMsg(type),600);
+  };
 
-function startVoice(type){
-  const rec=type==='cyber'?cyberRec:saharaRec;if(!rec)return;
-  if(type==='cyber')cyberListening=true;else saharaListening=true;
-  rec.start();
-  document.getElementById(type+'Mic').textContent='⏹️ रोकें';
-  document.getElementById(type+'Mic').classList.add('listening');
-  document.getElementById(type+'VoiceStatus').textContent='🔴 बोलिए...';
-}
+  rec.onerror=(e)=>{
+    statusEl.textContent='❌ '+e.error+' — दोबारा कोशिश करें';
+    activeRec=null;
+    currentType=null;
+    setMicUI(type,'idle');
+  };
 
-function stopVoice(type){
-  const rec=type==='cyber'?cyberRec:saharaRec;if(!rec)return;
-  if(type==='cyber')cyberListening=false;else saharaListening=false;
-  rec.stop();
-  document.getElementById(type+'Mic').textContent='🎙️ हिंदी में बोलें';
-  document.getElementById(type+'Mic').classList.remove('listening');
+  rec.onend=()=>{
+    if(activeRec===rec){
+      activeRec=null;
+      currentType=null;
+      setMicUI(type,'idle');
+    }
+  };
+
+  try{
+    rec.start();
+    activeRec=rec;
+    currentType=type;
+  }catch(e){
+    statusEl.textContent='❌ दोबारा कोशिश करें: '+e.message;
+  }
 }
 
 function speakText(text){
@@ -657,6 +714,7 @@ async function sendMsg(type){
     if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg(type);}
   });
 });
+
 
 function submitAwaazForm(){
   const name=document.getElementById('af-name').value.trim();
