@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>सुरक्षित आवाज़ — Surakshit Awaaz</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FF6B00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Surakshit Awaaz">
+  <link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Noto+Sans+Devanagari:wght@300;400;500;600;700;900&family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* PWA INSTALL BANNER */
+    .pwa-banner{position:fixed;bottom:80px;left:16px;right:16px;z-index:999;background:linear-gradient(135deg,#FF6B00,#FF3366);border-radius:16px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 30px #FF6B0044;animation:slideUpBanner 0.5s ease;gap:12px}
+    @keyframes slideUpBanner{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .pwa-text{color:white;font-size:13px;font-weight:600;line-height:1.4;flex:1}
+    .pwa-text span{font-size:11px;opacity:0.85;font-weight:400;display:block;margin-top:2px}
+    .pwa-btns{display:flex;gap:8px;flex-shrink:0}
+    .pwa-install{background:white;color:#FF6B00;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans Devanagari',sans-serif}
+    .pwa-dismiss{background:rgba(255,255,255,0.2);color:white;border:none;border-radius:10px;padding:8px 10px;font-size:12px;cursor:pointer}
+
+    /* PAGE TRANSITIONS */
+    .page{animation:none}
+    .page.entering{animation:pageEnter 0.3s cubic-bezier(0.16,1,0.3,1) forwards}
+    @keyframes pageEnter{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+    /* DAILY SAFETY TIP */
+    .tip-section{background:linear-gradient(135deg,#1a0a00,#2a1000);color:white;border-top:3px solid #FF6B00}
+    .tip-card{background:rgba(255,107,0,0.1);border:1px solid #FF6B0033;border-radius:20px;padding:24px;margin-top:32px;position:relative;overflow:hidden}
+    .tip-card::before{content:'💡';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:60px;opacity:0.1}
+    .tip-date{font-size:11px;color:#FF9500;font-weight:700;letter-spacing:1px;margin-bottom:8px}
+    .tip-text{font-size:16px;color:white;line-height:1.7;font-weight:500}
+    .tip-source{font-size:11px;color:#6b4a2a;margin-top:10px}
+
+    /* SURAKSHA SCORE */
+    .score-section{background:linear-gradient(135deg,#0a0a1f,#0d0d2a);color:white}
+    .score-section .sec-desc{color:#a0a0b0}
+    .score-intro{background:rgba(255,107,0,0.08);border:1px solid #FF6B0022;border-radius:20px;padding:24px;margin-top:32px;text-align:center}
+    .score-start-btn{margin-top:16px;padding:14px 32px;background:linear-gradient(135deg,#FF6B00,#FF3366);color:white;border:none;border-radius:14px;font-family:'Noto Sans Devanagari',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px #FF6B0033;transition:transform 0.2s}
+    .score-start-btn:hover{transform:translateY(-3px)}
+    .score-quiz{display:none;margin-top:24px}
+    .score-q{background:#13131f;border:1px solid #2a2a3a;border-radius:16px;padding:20px;margin-bottom:16px;animation:pageEnter 0.3s ease}
+    .score-q-text{font-size:15px;color:white;margin-bottom:14px;line-height:1.6}
+    .score-q-num{font-size:11px;color:#FF6B00;font-weight:700;margin-bottom:8px;letter-spacing:1px}
+    .score-options{display:flex;flex-direction:column;gap:8px}
+    .score-opt{padding:12px 16px;background:#0d0d20;border:1px solid #2a2a3a;border-radius:10px;color:#a0a0b0;font-family:'Noto Sans Devanagari',sans-serif;font-size:14px;cursor:pointer;text-align:left;transition:all 0.2s}
+    .score-opt:hover{border-color:#FF6B0044;color:white;background:#1a0a00}
+    .score-opt.selected{border-color:#FF6B00;color:#FF9500;background:#1a0a00}
+    .score-progress{height:4px;background:#2a2a3a;border-radius:4px;margin-bottom:24px;overflow:hidden}
+    .score-progress-fill{height:100%;background:linear-gradient(90deg,#FF6B00,#FF3366);border-radius:4px;transition:width 0.4s ease}
+    .score-result{display:none;text-align:center;padding:28px 20px;background:#13131f;border:1px solid #2a2a3a;border-radius:20px;margin-top:16px}
+    .score-number{font-family:'Bebas Neue',sans-serif;font-size:80px;letter-spacing:4px;line-height:1}
+    .score-grade{font-size:22px;font-weight:700;margin:8px 0}
+    .score-tips{text-align:left;margin-top:20px;display:flex;flex-direction:column;gap:10px}
+    .score-tip-item{background:#0d0d20;border-radius:10px;padding:12px 14px;font-size:13px;color:#a0a0b0;border-left:3px solid #FF6B00;line-height:1.6}
+    .score-share{margin-top:20px;padding:13px 28px;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;border-radius:12px;font-family:'Noto Sans Devanagari',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+    .score-retry{margin-top:10px;padding:11px 24px;background:transparent;color:#FF6B00;border:1px solid #FF6B0044;border-radius:12px;font-family:'Noto Sans Devanagari',sans-serif;font-size:14px;cursor:pointer}
+
+    /* MERA PEHLA SMARTPHONE */
+    .phone-guide-section{background:#FFF0E8}
+    .phone-guide-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:36px}
+    .phone-guide-card{background:white;border-radius:18px;padding:22px 18px;border:1px solid #F0E8E0;transition:transform 0.3s;position:relative;overflow:hidden}
+    .phone-guide-card:hover{transform:translateY(-5px)}
+    .phone-guide-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
+    .phone-guide-card:nth-child(1)::after{background:#FF6B00}
+    .phone-guide-card:nth-child(2)::after{background:#FF3366}
+    .phone-guide-card:nth-child(3)::after{background:#00A86B}
+    .phone-guide-card:nth-child(4)::after{background:#3D00B8}
+    .phone-guide-card:nth-child(5)::after{background:#FFD700}
+    .phone-guide-num{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;margin-bottom:8px;opacity:0.15;color:#1A0A00}
+    .phone-guide-icon{font-size:32px;margin-bottom:10px;display:block;margin-top:-30px}
+    .phone-guide-title{font-size:15px;font-weight:700;color:#1A0A00;margin-bottom:8px}
+    .phone-guide-desc{font-size:12px;color:#6B4A2A;line-height:1.7}
+    .phone-guide-tip{font-size:11px;margin-top:10px;padding:8px 10px;border-radius:8px;background:#FFF8F0;border-left:3px solid #FF6B00;color:#8B4A00;line-height:1.5}
+
+    *{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}
+    .page{display:none;min-height:100vh}
+    .page.active{display:block}
+
+    /* BOTTOM NAV */
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:rgba(10,10,15,0.97);backdrop-filter:blur(20px);border-top:1px solid #2a2a3a;display:flex;justify-content:space-around;padding:10px 0 14px}
+    .nav-btn{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px 20px;border-radius:12px;transition:all 0.3s;color:#6b7a99;font-family:'Noto Sans Devanagari',sans-serif}
+    .nav-btn .nav-icon{font-size:22px}
+    .nav-btn .nav-label{font-size:10px;font-weight:600;letter-spacing:0.3px}
+    .nav-btn.active{color:#FF6B00}
+
+    /* HOME PAGE */
+    #page-home{font-family:'Noto Sans Devanagari',sans-serif;background:#FFF8F0;color:#1A0A00;padding-bottom:80px}
+
+    .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:60px 24px 80px;background:#FFF8F0}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,#FF6B0015 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,#FF336615 0%,transparent 50%),radial-gradient(ellipse at 60% 80%,#00A86B12 0%,transparent 50%);pointer-events:none}
+    .hero-circle{position:absolute;border-radius:50%;pointer-events:none}
+    .circle-1{width:500px;height:500px;border:1px solid #FF6B0015;top:50%;left:50%;transform:translate(-50%,-50%);animation:rotateSlow 30s linear infinite}
+    .circle-2{width:320px;height:320px;border:1px solid #FF336615;top:50%;left:50%;transform:translate(-50%,-50%);animation:rotateSlow 20s linear infinite reverse}
+    @keyframes rotateSlow{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+    .hero-content{text-align:center;position:relative;z-index:2;max-width:700px}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:#FF6B0015;border:1px solid #FF6B0033;border-radius:30px;padding:8px 20px;font-size:13px;font-weight:600;color:#FF6B00;margin-bottom:24px}
+    .hero-title{font-family:'Tiro Devanagari Hindi',serif;font-size:clamp(52px,12vw,96px);line-height:1.1;margin-bottom:8px}
+    .hero-title .t1{color:#FF6B00;display:block}
+    .hero-title .t2{color:#1A0A00;display:block}
+    .hero-sub{font-size:16px;color:#6B4A2A;margin:18px 0 32px;line-height:1.7}
+    .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .btn-primary{padding:14px 28px;background:linear-gradient(135deg,#FF6B00,#FF3366);color:white;border:none;border-radius:14px;font-family:'Noto Sans Devanagari',sans-serif;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 8px 30px #FF6B0033;transition:transform 0.2s}
+    .btn-primary:hover{transform:translateY(-3px)}
+    .btn-secondary{padding:14px 28px;background:transparent;color:#1A0A00;border:2px solid #FF6B0044;border-radius:14px;font-family:'Noto Sans Devanagari',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s}
+    .btn-secondary:hover{background:#FF6B000A;border-color:#FF6B00}
+
+    .stats-strip{background:linear-gradient(135deg,#FF6B00,#FF3366);padding:18px 24px;display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+    .stat-item{text-align:center;color:white}
+    .stat-number{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px}
+    .stat-label{font-size:11px;opacity:0.85;margin-top:2px}
+
+    .home-section{padding:60px 24px}
+    .sec-tag{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:2px;margin-bottom:12px}
+    .sec-tag::before{content:'';width:20px;height:2px;background:currentColor}
+    .sec-title{font-family:'Tiro Devanagari Hindi',serif;font-size:clamp(28px,5vw,44px);line-height:1.2;margin-bottom:12px}
+    .sec-desc{font-size:15px;color:#6B4A2A;line-height:1.8;max-width:600px}
+
+    /* Gawah */
+    .gawah-section{background:#0A0A0F;color:white}
+    .gawah-section .sec-desc{color:#a0a0b0}
+    .gawah-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;margin-top:40px}
+    .gawah-card{background:#13131f;border:1px solid #2a2a3a;border-radius:20px;overflow:hidden;transition:transform 0.3s,border-color 0.3s}
+    .gawah-card:hover{transform:translateY(-6px);border-color:#FF6B00}
+    .gawah-thumb{height:150px;display:flex;align-items:center;justify-content:center}
+    .gawah-card:nth-child(1) .gawah-thumb{background:linear-gradient(135deg,#3D00B8,#FF3366)}
+    .gawah-card:nth-child(2) .gawah-thumb{background:linear-gradient(135deg,#FF6B00,#FF3366)}
+    .gawah-card:nth-child(3) .gawah-thumb{background:linear-gradient(135deg,#00A86B,#3D00B8)}
+    .play-btn{width:50px;height:50px;background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid rgba(255,255,255,0.4)}
+    .gawah-body{padding:16px}
+    .gawah-tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:8px}
+    .tag-cyber{background:#FF6B0020;color:#FF9500;border:1px solid #FF6B0040}
+    .tag-safety{background:#FF336620;color:#FF6688;border:1px solid #FF336640}
+    .tag-child{background:#00A86B20;color:#00D68F;border:1px solid #00A86B40}
+    .gawah-title{font-size:14px;font-weight:600;color:white;margin-bottom:5px}
+    .gawah-desc{font-size:12px;color:#6b7a99;line-height:1.6}
+    .gawah-coming{text-align:center;margin-top:28px;padding:18px;border:2px dashed #2a2a3a;border-radius:14px;color:#6b7a99;font-size:13px}
+
+    /* Margdarshika */
+    .marg-section{background:white}
+    .marg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;margin-top:40px}
+    .marg-card{background:#FFF8F0;border-radius:20px;padding:22px 18px;border:1px solid #F0E8E0;position:relative;overflow:hidden;transition:transform 0.3s}
+    .marg-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%}
+    .marg-card:nth-child(1)::before{background:#FF6B00}
+    .marg-card:nth-child(2)::before{background:#FF3366}
+    .marg-card:nth-child(3)::before{background:#00A86B}
+    .marg-card:nth-child(4)::before{background:#3D00B8}
+    .marg-card:hover{transform:translateY(-5px)}
+    .marg-icon{font-size:30px;margin-bottom:10px;display:block}
+    .marg-title{font-size:15px;font-weight:700;margin-bottom:12px}
+    .marg-steps{display:flex;flex-direction:column;gap:8px}
+    .marg-step{display:flex;gap:8px;align-items:flex-start}
+    .marg-num{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0}
+    .marg-card:nth-child(1) .marg-num{background:#FF6B00}
+    .marg-card:nth-child(2) .marg-num{background:#FF3366}
+    .marg-card:nth-child(3) .marg-num{background:#00A86B}
+    .marg-card:nth-child(4) .marg-num{background:#3D00B8}
+    .marg-text{font-size:12px;color:#6B4A2A;line-height:1.6}
+    .rights-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+    .right-item{background:white;border-radius:8px;padding:7px 9px;font-size:11px;color:#4a3a6a;font-weight:500;border:1px solid #E8E0F0}
+
+    /* Assistants */
+    .assist-section{background:#FFF0E8}
+    .assist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;margin-top:40px}
+    .assist-card{border-radius:20px;overflow:hidden;box-shadow:0 8px 30px #00000010;transition:transform 0.3s}
+    .assist-card:hover{transform:translateY(-6px)}
+    .assist-header{padding:22px;display:flex;align-items:center;gap:14px}
+    .assist-card.cyber .assist-header{background:linear-gradient(135deg,#0d1829,#080c14)}
+    .assist-card.sahara .assist-header{background:linear-gradient(135deg,#1a0f25,#0d0d14)}
+    .assist-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .assist-card.cyber .assist-icon{background:linear-gradient(135deg,#cc1f3d,#1e2d4a);border:1px solid #ff3b5c33}
+    .assist-card.sahara .assist-icon{background:linear-gradient(135deg,#e8477a,#c026d3)}
+    .assist-name{color:white;font-size:17px;font-weight:700}
+    .assist-sub{color:rgba(255,255,255,0.4);font-size:10px;margin-top:2px;letter-spacing:0.5px}
+    .assist-body{padding:16px 18px;background:#f8f8ff}
+    .feat{display:flex;align-items:center;gap:8px;font-size:12px;color:#4a4a6a;margin-bottom:7px}
+    .feat-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+    .assist-card.cyber .feat-dot{background:#ff3b5c}
+    .assist-card.sahara .feat-dot{background:#ff6b9d}
+    .assist-footer{padding:12px 18px 18px;background:#f8f8ff}
+    .assist-btn{width:100%;padding:12px;border:none;border-radius:12px;font-family:'Noto Sans Devanagari',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:white;transition:all 0.2s}
+    .assist-card.cyber .assist-btn{background:linear-gradient(135deg,#cc1f3d,#0d2a3a)}
+    .assist-card.sahara .assist-btn{background:linear-gradient(135deg,#e8477a,#c026d3)}
+
+    /* Awaaz Do */
+    .awaaz-section{background:linear-gradient(135deg,#0A0A0F,#0d1829);color:white}
+    .awaaz-section .sec-desc{color:#a0a0b0}
+    .awaaz-layout{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px;align-items:center}
+    @media(max-width:640px){.awaaz-layout{grid-template-columns:1fr}}
+    .awaaz-steps{display:flex;flex-direction:column;gap:16px}
+    .awaaz-step{display:flex;gap:12px;align-items:flex-start}
+    .step-num{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#00A86B,#00A86B88);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:white;flex-shrink:0}
+    .step-h{font-size:14px;font-weight:600;color:white;margin-bottom:3px}
+    .step-p{font-size:12px;color:#6b7a99;line-height:1.6}
+    .awaaz-phone{background:#13131f;border:1px solid #2a2a3a;border-radius:22px;padding:26px;text-align:center}
+    .phone-emoji{font-size:52px;display:block;margin-bottom:12px;animation:ring 2s ease-in-out infinite}
+    @keyframes ring{0%,100%,40%{transform:rotate(0deg)}10%,30%{transform:rotate(-10deg)}20%{transform:rotate(10deg)}}
+    .phone-num{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;background:linear-gradient(90deg,#00D68F,#00A86B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+    .phone-label{font-size:12px;color:#6b7a99;margin-bottom:14px}
+    .soon-badge{display:inline-flex;align-items:center;gap:6px;background:#00A86B18;border:1px solid #00A86B44;border-radius:20px;padding:6px 14px;font-size:11px;color:#00D68F;font-weight:600}
+    .soon-dot{width:7px;height:7px;border-radius:50%;background:#00D68F;animation:blink 1.5s infinite}
+
+    /* Helplines */
+    .help-section{background:#FFF8F0}
+    .help-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:40px}
+    .help-card{background:white;border-radius:16px;padding:22px 16px;text-align:center;border:1px solid #F0E8E0;transition:transform 0.3s}
+    .help-card:hover{transform:translateY(-5px)}
+    .help-emoji{font-size:28px;margin-bottom:8px;display:block}
+    .help-num{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;line-height:1;margin-bottom:4px}
+    .help-name{font-size:11px;color:#6B4A2A;font-weight:600;margin-bottom:3px}
+    .help-desc{font-size:10px;color:#a08060;line-height:1.5}
+    .h1 .help-num{color:#FF6B00}
+    .h2 .help-num{color:#FF3366}
+    .h3 .help-num{color:#3D00B8}
+    .h4 .help-num{color:#00A86B}
+    .h5 .help-num{color:#B8860B}
+
+    .home-footer{background:#0A0A0F;color:white;padding:32px 24px 100px;text-align:center}
+    .home-footer h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,#FF6B00,#FF3366);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+    .home-footer p{font-size:12px;color:#3a3a4a}
+    .home-footer span{color:#FF6B00}
+
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+    /* CYBER PAGE */
+    #page-cyber{background:#080c14;min-height:100vh;font-family:'Noto Sans Devanagari','Space Grotesk',sans-serif;padding-bottom:80px}
+    #page-cyber::before{content:'';position:fixed;top:-150px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,#ff3b5c15 0%,transparent 70%);pointer-events:none}
+    .cyber-wrap{max-width:680px;margin:0 auto;padding:20px 16px;position:relative;z-index:1}
+    .cyber-header{padding:22px;background:linear-gradient(135deg,#0d1829,#080c14);border-radius:20px 20px 0 0;border:1px solid #1e2d4a;border-bottom:none;position:relative;overflow:hidden}
+    .cyber-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#ff3b5c,#00d4ff,transparent);background-size:200% 100%;animation:flow 3s linear infinite}
+    @keyframes flow{0%{background-position:100% 0}100%{background-position:-100% 0}}
+    .c-header-top{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+    .c-logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#cc1f3d,#1e2d4a);border:1px solid #ff3b5c33;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 0 20px #ff3b5c22;animation:cpulse 3s ease-in-out infinite}
+    @keyframes cpulse{0%,100%{box-shadow:0 0 20px #ff3b5c22}50%{box-shadow:0 0 35px #ff3b5c44}}
+    .c-title{color:white;font-size:20px;font-weight:700}
+    .c-sub{color:rgba(255,255,255,0.4);font-size:10px;margin-top:2px;letter-spacing:0.5px;font-family:'Space Grotesk',sans-serif}
+    .c-status{display:flex;align-items:center;gap:6px}
+    .c-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade8066;animation:blink 2s infinite}
+    .c-status-text{font-size:11px;color:#4ade80;font-family:'Space Grotesk',sans-serif;font-weight:500}
+    .c-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .c-pill{padding:4px 11px;border-radius:20px;font-size:10px;font-weight:600;font-family:'Space Grotesk',sans-serif}
+    .cp-red{background:#ff3b5c12;border:1px solid #ff3b5c33;color:#ff6b84}
+    .cp-cyan{background:#00d4ff10;border:1px solid #00d4ff25;color:#00d4ff}
+    .c-chat{height:380px;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:14px;background:#0d1220;border-left:1px solid #1e2d4a;border-right:1px solid #1e2d4a;scrollbar-width:thin;scrollbar-color:#1e2d4a transparent}
+    .c-input-area{padding:14px 16px 16px;background:#08101e;border:1px solid #1e2d4a;border-top:none;border-radius:0 0 20px 20px}
+    .c-input-wrap{background:#111827;border:1px solid #1e2d4a;border-radius:14px;overflow:hidden;transition:border-color 0.3s}
+    .c-input-wrap:focus-within{border-color:#ff3b5c44;box-shadow:0 0 0 3px #ff3b5c0a}
+    .c-textarea{width:100%;background:transparent;border:none;padding:12px 14px 8px;color:#f0f4ff;font-family:'Noto Sans Devanagari',sans-serif;font-size:14px;resize:none;outline:none;line-height:1.6}
+    .c-textarea::placeholder{color:#2a3a55}
+    .c-actions{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 10px}
+    .c-mic{display:flex;align-items:center;gap:6px;padding:7px 13px;background:#0d1829;border:1px solid #1e2d4a;border-radius:10px;color:#6b7a99;font-family:'Noto Sans Devanagari',sans-serif;font-size:12px;cursor:pointer;transition:all 0.3s}
+    .c-mic:hover{border-color:#ff3b5c44;color:#ff6b84}
+    .c-mic.listening{background:#1a0810;border-color:#ff3b5c;color:#ff6b84}
+    .c-send{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#cc1f3d,#0d2a3a);border:1px solid #ff3b5c44;color:white;font-size:14px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px #ff3b5c22}
+    .c-send:hover{transform:scale(1.08)}
+    .c-send:disabled{background:#0d1829;border-color:#1e2d4a;box-shadow:none;cursor:not-allowed;transform:none}
+    .c-voice-status{font-size:11px;color:#ff3b5c;text-align:center;margin-top:7px;min-height:15px;font-family:'Space Grotesk',sans-serif}
+    .c-footer{padding:10px 16px;background:#060a10;border:1px solid #111e30;border-top:none;border-radius:0 0 20px 20px;text-align:center}
+    .c-footer p{font-size:10px;color:#1e2d4a;font-family:'Space Grotesk',sans-serif}
+    .c-footer strong{color:#ff3b5c55}
+
+    /* SAHARA PAGE */
+    #page-sahara{background:#0d0d14;min-height:100vh;font-family:'Noto Sans Devanagari',sans-serif;padding-bottom:80px}
+    #page-sahara::before{content:'';position:fixed;top:-20%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,#ff6b9d18 0%,transparent 70%);pointer-events:none;animation:blob1 8s ease-in-out infinite}
+    #page-sahara::after{content:'';position:fixed;bottom:-20%;right:-10%;width:400px;height:400px;background:radial-gradient(circle,#c026d318 0%,transparent 70%);pointer-events:none;animation:blob2 10s ease-in-out infinite}
+    @keyframes blob1{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,15px)}}
+    @keyframes blob2{0%,100%{transform:translate(0,0)}50%{transform:translate(-15px,-20px)}}
+    .sahara-wrap{max-width:680px;margin:0 auto;padding:20px 16px;position:relative;z-index:1}
+    .s-header{padding:22px;background:linear-gradient(135deg,#1a0f25,#0f0a1a);border-radius:20px 20px 0 0;border:1px solid #2d1f35;border-bottom:none;position:relative;overflow:hidden}
+    .s-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#ff6b9d,#c026d3,transparent);animation:shimmer 3s linear infinite}
+    @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+    .s-header-top{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+    .s-logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#e8477a,#c026d3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 8px 24px #ff6b9d33;animation:spulse 3s ease-in-out infinite}
+    @keyframes spulse{0%,100%{box-shadow:0 8px 24px #ff6b9d33}50%{box-shadow:0 8px 40px #ff6b9d55}}
+    .s-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700}
+    .s-title span{background:linear-gradient(135deg,#ff8fb3,#c026d3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .s-sub{font-size:11px;color:#a89aad;margin-top:2px;font-weight:300}
+    .s-status{display:flex;align-items:center;gap:6px}
+    .s-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade8066;animation:blink 2s infinite}
+    .s-status-text{font-size:11px;color:#4ade80;font-weight:500}
+    .s-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .s-pill{padding:4px 11px;border-radius:20px;font-size:10px;font-weight:600}
+    .sp-rose{background:#ff6b9d18;border:1px solid #ff6b9d44;color:#ff8fb3}
+    .sp-purple{background:#c026d318;border:1px solid #c026d344;color:#d946ef}
+    .s-chat{height:380px;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:14px;background:#13131f;border-left:1px solid #2d1f35;border-right:1px solid #2d1f35;scrollbar-width:thin;scrollbar-color:#2d1f35 transparent}
+    .s-input-area{padding:14px 16px 16px;background:#0f0a18;border:1px solid #2d1f35;border-top:none;border-radius:0 0 20px 20px}
+    .s-input-wrap{background:#1a1a2e;border:1px solid #2d1f35;border-radius:14px;overflow:hidden;transition:border-color 0.3s}
+    .s-input-wrap:focus-within{border-color:#ff6b9d55;box-shadow:0 0 0 3px #ff6b9d0f}
+    .s-textarea{width:100%;background:transparent;border:none;padding:12px 14px 8px;color:#fff0f5;font-family:'Noto Sans Devanagari',sans-serif;font-size:14px;resize:none;outline:none;line-height:1.6}
+    .s-textarea::placeholder{color:#4a3555}
+    .s-actions{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 10px}
+    .s-mic{display:flex;align-items:center;gap:6px;padding:7px 13px;background:#1f1030;border:1px solid #2d1f35;border-radius:10px;color:#a89aad;font-family:'Noto Sans Devanagari',sans-serif;font-size:12px;cursor:pointer;transition:all 0.3s}
+    .s-mic:hover{border-color:#ff6b9d44;color:#ff8fb3}
+    .s-mic.listening{background:#2d0f20;border-color:#ff6b9d;color:#ff8fb3}
+    .s-send{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#e8477a,#c026d3);border:none;color:white;font-size:14px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px #ff6b9d33}
+    .s-send:hover{transform:scale(1.08)}
+    .s-send:disabled{background:#1f1030;box-shadow:none;cursor:not-allowed;transform:none}
+    .s-voice-status{font-size:11px;color:#ff6b9d;text-align:center;margin-top:7px;min-height:15px}
+    .s-footer{padding:10px 16px;background:#080810;border:1px solid #2d1f35;border-top:none;border-radius:0 0 20px 20px;text-align:center}
+    .s-footer p{font-size:10px;color:#3d2f4a;line-height:1.6}
+    .s-footer strong{color:#ff6b9d88}
+
+    /* SHARED CHAT */
+    .msg{display:flex;gap:8px;animation:fadeMsg 0.4s ease both;opacity:0}
+    @keyframes fadeMsg{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .msg-bot{align-self:flex-start;max-width:88%}
+    .msg-user{align-self:flex-end;flex-direction:row-reverse;max-width:80%}
+    .msg-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:3px}
+    .msg-bubble{padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.7}
+    .cav-bot{background:linear-gradient(135deg,#cc1f3d,#1e2d4a);border:1px solid #ff3b5c33}
+    .cav-user{background:#0a1f35;border:1px solid #1e2d4a}
+    .cbub-bot{background:#0d1829;border:1px solid #1e2d4a;color:#f0f4ff;border-top-left-radius:3px}
+    .cbub-user{background:linear-gradient(135deg,#0f1e38,#0a1525);border:1px solid #ff3b5c18;color:#c8d8f0;border-top-right-radius:3px}
+    .sav-bot{background:linear-gradient(135deg,#e8477a,#c026d3)}
+    .sav-user{background:#1f1030;border:1px solid #2d1f35}
+    .sbub-bot{background:#1a0f25;border:1px solid #2d1f35;color:#fff0f5;border-top-left-radius:3px}
+    .sbub-user{background:linear-gradient(135deg,#2d1040,#1f1030);border:1px solid #ff6b9d22;color:#fce7f3;border-top-right-radius:3px}
+    .typing-dots{display:flex;gap:4px;align-items:center}
+    .typing-dots span{width:6px;height:6px;border-radius:50%;animation:tbounce 1.3s ease-in-out infinite}
+    .typing-dots span:nth-child(2){animation-delay:0.15s}
+    .typing-dots span:nth-child(3){animation-delay:0.3s}
+    @keyframes tbounce{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}
+    .cdots span{background:#ff3b5c}
+    .cdots span:nth-child(2){background:#00d4ff}
+    .sdots span{background:#ff6b9d}
+    .sdots span:nth-child(2){background:#d946ef}
+  </style>
+</head>
+<body>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <section class="hero">
+    <div class="hero-circle circle-1"></div>
+    <div class="hero-circle circle-2"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🇮🇳 भारत की महिलाओं और बच्चों के लिए</div>
+      <h1 class="hero-title"><span class="t1">सुरक्षित</span><span class="t2">आवाज़</span></h1>
+      <p class="hero-sub">साइबर अपराध और महिला सुरक्षा के लिए भारत का पहला<br>हिंदी AI सहायक — सीधे आपकी भाषा में</p>
+      <p style="font-size:13px;color:#FF6B00;font-weight:600;margin-bottom:20px">✨ by Vijayashree</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="showPage('cyber')">🛡️ सुरक्षा साथी से बात करें</button>
+        <button class="btn-secondary" onclick="showPage('sahara')">🌸 साहारा से बात करें</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-strip">
+    <div class="stat-item"><div class="stat-number">1930</div><div class="stat-label">साइबर क्राइम हेल्पलाइन</div></div>
+    <div class="stat-item"><div class="stat-number">1091</div><div class="stat-label">महिला हेल्पलाइन</div></div>
+    <div class="stat-item"><div class="stat-number">100%</div><div class="stat-label">हिंदी में — मुफ़्त</div></div>
+    <div class="stat-item"><div class="stat-number">24/7</div><div class="stat-label">हमेशा उपलब्ध</div></div>
+  </div>
+
+  <!-- Gawah -->
+  <section class="home-section gawah-section">
+    <div class="sec-tag" style="color:#FF9500">🎙️ गवाह</div>
+    <h2 class="sec-title">उनकी कहानियाँ</h2>
+    <p class="sec-desc">असली महिलाओं की आवाज़ें — जो डिजिटल धोखाधड़ी और उत्पीड़न से गुज़री हैं।</p>
+    <div class="gawah-grid">
+      <div class="gawah-card"><div class="gawah-thumb"><div class="play-btn">▶️</div></div><div class="gawah-body"><span class="gawah-tag tag-cyber">साइबर धोखाधड़ी</span><h3 class="gawah-title">जल्द आ रहा है</h3><p class="gawah-desc">UPI fraud का शिकार बनी महिला की कहानी।</p></div></div>
+      <div class="gawah-card"><div class="gawah-thumb"><div class="play-btn">▶️</div></div><div class="gawah-body"><span class="gawah-tag tag-safety">महिला सुरक्षा</span><h3 class="gawah-title">जल्द आ रहा है</h3><p class="gawah-desc">ऑनलाइन उत्पीड़न से गुज़रने के बाद कैसे आगे बढ़ीं।</p></div></div>
+      <div class="gawah-card"><div class="gawah-thumb"><div class="play-btn">▶️</div></div><div class="gawah-body"><span class="gawah-tag tag-child">बाल सुरक्षा</span><h3 class="gawah-title">जल्द आ रहा है</h3><p class="gawah-desc">एक माँ की कहानी — बच्चे को ऑनलाइन खतरों से बचाया।</p></div></div>
+    </div>
+    <div class="gawah-coming">🎙️ असली कहानियाँ जल्द यहाँ होंगी — हम ग्रामीण क्षेत्रों में महिलाओं से मिलकर आवाज़ें रिकॉर्ड कर रहे हैं</div>
+  </section>
+
+  <!-- Margdarshika -->
+  <section class="home-section marg-section">
+    <div class="sec-tag" style="color:#3D00B8">📖 सुरक्षा मार्गदर्शिका</div>
+    <h2 class="sec-title">जानें, समझें, सुरक्षित रहें</h2>
+    <p class="sec-desc">साइबर क्राइम रिपोर्ट कैसे करें, आपातकाल में क्या करें, और महिलाओं के कानूनी अधिकार।</p>
+    <div class="marg-grid">
+      <div class="marg-card"><span class="marg-icon">🚨</span><h3 class="marg-title">साइबर क्राइम रिपोर्ट कैसे करें?</h3><div class="marg-steps"><div class="marg-step"><div class="marg-num">1</div><div class="marg-text">1930 पर कॉल करें या cybercrime.gov.in पर जाएं</div></div><div class="marg-step"><div class="marg-num">2</div><div class="marg-text">"Report Cyber Crime" पर क्लिक करें</div></div><div class="marg-step"><div class="marg-num">3</div><div class="marg-text">शिकायत हिंदी में लिखें — सभी details दें</div></div><div class="marg-step"><div class="marg-num">4</div><div class="marg-text">Complaint number लिखकर रखें</div></div><div class="marg-step"><div class="marg-num">5</div><div class="marg-text">Bank fraud हो तो तुरंत bank भी call करें</div></div></div></div>
+      <div class="marg-card"><span class="marg-icon">⚡</span><h3 class="marg-title">आपातकाल में क्या करें?</h3><div class="marg-steps"><div class="marg-step"><div class="marg-num">1</div><div class="marg-text">सबसे पहले सुरक्षित जगह जाएं</div></div><div class="marg-step"><div class="marg-num">2</div><div class="marg-text">100 पर call करें — location बताएं</div></div><div class="marg-step"><div class="marg-num">3</div><div class="marg-text">किसी भरोसेमंद को तुरंत सूचित करें</div></div><div class="marg-step"><div class="marg-num">4</div><div class="marg-text">1091 पर call करें — महिला हेल्पलाइन</div></div><div class="marg-step"><div class="marg-num">5</div><div class="marg-text">सबूत — screenshots, messages — रखें</div></div></div></div>
+      <div class="marg-card"><span class="marg-icon">🔐</span><h3 class="marg-title">ऑनलाइन सुरक्षित कैसे रहें?</h3><div class="marg-steps"><div class="marg-step"><div class="marg-num">✓</div><div class="marg-text">OTP कभी किसी को न बताएं</div></div><div class="marg-step"><div class="marg-num">✓</div><div class="marg-text">अनजान लिंक पर क्लिक न करें</div></div><div class="marg-step"><div class="marg-num">✓</div><div class="marg-text">Lottery message हमेशा fraud होता है</div></div><div class="marg-step"><div class="marg-num">✓</div><div class="marg-text">Address और phone share न करें</div></div><div class="marg-step"><div class="marg-num">✓</div><div class="marg-text">अनजान friend requests से बचें</div></div></div></div>
+      <div class="marg-card"><span class="marg-icon">⚖️</span><h3 class="marg-title">महिलाओं के कानूनी अधिकार</h3><div class="rights-grid"><div class="right-item">🛡️ घरेलू हिंसा कानून 2005</div><div class="right-item">📱 IT Act धारा 66E</div><div class="right-item">⚖️ IPC धारा 354D</div><div class="right-item">🚔 Zero FIR का अधिकार</div><div class="right-item">🏠 घर में रहने का अधिकार</div><div class="right-item">👩‍⚖️ महिला पुलिस की माँग</div><div class="right-item">📞 निःशुल्क कानूनी मदद</div><div class="right-item">🔒 पहचान गोपनीय रखना</div></div></div>
+    </div>
+  </section>
+
+  <!-- Assistants -->
+  <section class="home-section assist-section">
+    <div class="sec-tag" style="color:#00A86B">🤖 AI सहायक</div>
+    <h2 class="sec-title">हिंदी में बात करें</h2>
+    <p class="sec-desc">दो AI सहायक — साइबर सुरक्षा और महिला सुरक्षा के लिए।</p>
+    <div class="assist-grid">
+      <div class="assist-card cyber"><div class="assist-header"><div class="assist-icon">🛡️</div><div><div class="assist-name">सुरक्षा साथी</div><div class="assist-sub">CYBER CRIME ASSISTANT</div></div></div><div class="assist-body"><div class="feat"><div class="feat-dot"></div>UPI fraud और online scams की जानकारी</div><div class="feat"><div class="feat-dot"></div>साइबर क्राइम रिपोर्ट करने का तरीका</div><div class="feat"><div class="feat-dot"></div>हिंदी voice input और voice output</div><div class="feat"><div class="feat-dot"></div>बिल्कुल मुफ़्त</div></div><div class="assist-footer"><button class="assist-btn" onclick="showPage('cyber')">🛡️ सुरक्षा साथी से बात करें</button></div></div>
+      <div class="assist-card sahara"><div class="assist-header"><div class="assist-icon">🌸</div><div><div class="assist-name">साहारा</div><div class="assist-sub">WOMEN SAFETY ASSISTANT</div></div></div><div class="assist-body"><div class="feat"><div class="feat-dot"></div>घरेलू हिंसा और उत्पीड़न में मदद</div><div class="feat"><div class="feat-dot"></div>महिलाओं के कानूनी अधिकार</div><div class="feat"><div class="feat-dot"></div>भावनात्मक सहारा और मार्गदर्शन</div><div class="feat"><div class="feat-dot"></div>हिंदी voice input और voice output</div></div><div class="assist-footer"><button class="assist-btn" onclick="showPage('sahara')">🌸 साहारा से बात करें</button></div></div>
+    </div>
+  </section>
+
+  <!-- DAILY SAFETY TIP -->
+  <section class="home-section tip-section">
+    <div class="sec-tag" style="color:#FF9500">💡 आज की सुरक्षा टिप</div>
+    <h2 class="sec-title" style="color:white">रोज़ एक नई सीख</h2>
+    <p class="sec-desc">हर दिन एक नई साइबर सुरक्षा टिप — सरल हिंदी में।</p>
+    <div class="tip-card">
+      <div class="tip-date" id="tipDate">आज की टिप</div>
+      <div class="tip-text" id="tipText">लोड हो रहा है...</div>
+      <div class="tip-source">— Surakshit Awaaz AI द्वारा</div>
+    </div>
+  </section>
+
+  <!-- SURAKSHA SCORE -->
+  <section class="home-section score-section">
+    <div class="sec-tag" style="color:#FF6B00">🛡️ सुरक्षा स्कोर</div>
+    <h2 class="sec-title">आपका डिजिटल सुरक्षा स्कोर</h2>
+    <p class="sec-desc">10 आसान सवालों के जवाब दें और जानें आप कितने सुरक्षित हैं।</p>
+    <div class="score-intro" id="scoreIntro">
+      <div style="font-size:48px;margin-bottom:12px">🛡️</div>
+      <div style="font-size:16px;color:white;font-weight:600;margin-bottom:6px">अपना सुरक्षा स्कोर जानें</div>
+      <div style="font-size:13px;color:#6b7a99;line-height:1.6">बिल्कुल मुफ़्त · 2 मिनट · हिंदी में</div>
+      <button class="score-start-btn" onclick="startScoreQuiz()">🚀 शुरू करें</button>
+    </div>
+    <div class="score-progress" id="scoreProgress" style="display:none"><div class="score-progress-fill" id="scoreProgressFill" style="width:10%"></div></div>
+    <div class="score-quiz" id="scoreQuiz"></div>
+    <div class="score-result" id="scoreResult">
+      <div style="color:#FF6B00;font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:8px">आपका सुरक्षा स्कोर</div>
+      <div class="score-number" id="scoreNumber">0</div>
+      <div style="font-size:14px;color:#6b7a99;margin-bottom:4px">/ 100</div>
+      <div class="score-grade" id="scoreGrade"></div>
+      <div class="score-tips" id="scoreTips"></div>
+      <button class="score-share" onclick="shareScore()">📱 WhatsApp पर शेयर करें</button>
+      <br>
+      <button class="score-retry" onclick="retryScore()">🔄 दोबारा कोशिश करें</button>
+    </div>
+  </section>
+
+  <!-- MERA PEHLA SMARTPHONE -->
+  <section class="home-section phone-guide-section">
+    <div class="sec-tag" style="color:#FF6B00">📱 मेरा पहला Smartphone</div>
+    <h2 class="sec-title">पहला फोन मिला? पहले यह करें!</h2>
+    <p class="sec-desc">नया smartphone मिलने पर सबसे पहले ये 5 काम करें — अपनी सुरक्षा के लिए।</p>
+    <div class="phone-guide-grid">
+      <div class="phone-guide-card">
+        <div class="phone-guide-num">01</div>
+        <span class="phone-guide-icon">🔒</span>
+        <div class="phone-guide-title">Screen Lock लगाएं</div>
+        <div class="phone-guide-desc">Settings → Security → Screen Lock → PIN या Pattern चुनें। कम से कम 6 अंकों का PIN रखें।</div>
+        <div class="phone-guide-tip">⚠️ कभी भी 1234 या अपनी जन्म तारीख PIN मत रखें</div>
+      </div>
+      <div class="phone-guide-card">
+        <div class="phone-guide-num">02</div>
+        <span class="phone-guide-icon">🔄</span>
+        <div class="phone-guide-title">Software Update करें</div>
+        <div class="phone-guide-desc">Settings → Software Update → Download and Install। पुराने software में hackers आसानी से घुस सकते हैं।</div>
+        <div class="phone-guide-tip">💡 हमेशा automatic updates ON रखें</div>
+      </div>
+      <div class="phone-guide-card">
+        <div class="phone-guide-num">03</div>
+        <span class="phone-guide-icon">🚫</span>
+        <div class="phone-guide-title">अनजान Apps मत डालें</div>
+        <div class="phone-guide-desc">केवल Google Play Store से ही apps download करें। किसी WhatsApp link से app कभी मत डालें।</div>
+        <div class="phone-guide-tip">⚠️ बाहर से आई APK files बहुत खतरनाक होती हैं</div>
+      </div>
+      <div class="phone-guide-card">
+        <div class="phone-guide-num">04</div>
+        <span class="phone-guide-icon">📍</span>
+        <div class="phone-guide-title">Location Permission जाँचें</div>
+        <div class="phone-guide-desc">Settings → Apps → हर app की location permission देखें। केवल Maps जैसी ज़रूरी apps को ही location दें।</div>
+        <div class="phone-guide-tip">💡 "Only while using" option सबसे safe है</div>
+      </div>
+      <div class="phone-guide-card">
+        <div class="phone-guide-num">05</div>
+        <span class="phone-guide-icon">💾</span>
+        <div class="phone-guide-title">Backup चालू करें</div>
+        <div class="phone-guide-desc">Settings → Google → Backup → ON करें। फोन खोने पर भी आपका data सुरक्षित रहेगा।</div>
+        <div class="phone-guide-tip">💡 WiFi पर automatic backup होता है — data नहीं लगता</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Helplines -->
+  <section class="home-section help-section">
+    <div class="sec-tag" style="color:#FF3366">🆘 हेल्पलाइन</div>
+    <h2 class="sec-title">ज़रूरत पर यहाँ कॉल करें</h2>
+    <p class="sec-desc">ये नंबर बिल्कुल मुफ़्त हैं। किसी भी फोन से, कभी भी।</p>
+    <div class="help-grid">
+      <div class="help-card h1"><span class="help-emoji">🚨</span><div class="help-num">1930</div><div class="help-name">साइबर क्राइम</div><div class="help-desc">ऑनलाइन धोखाधड़ी रिपोर्ट करें</div></div>
+      <div class="help-card h2"><span class="help-emoji">👩</span><div class="help-num">1091</div><div class="help-name">महिला हेल्पलाइन</div><div class="help-desc">उत्पीड़न में तुरंत मदद</div></div>
+      <div class="help-card h3"><span class="help-emoji">🚔</span><div class="help-num">100</div><div class="help-name">पुलिस</div><div class="help-desc">किसी भी आपातकाल में</div></div>
+      <div class="help-card h4"><span class="help-emoji">🏠</span><div class="help-num">181</div><div class="help-name">घरेलू हिंसा</div><div class="help-desc">पीड़ित महिलाओं के लिए</div></div>
+      <div class="help-card h5"><span class="help-emoji">👶</span><div class="help-num">1098</div><div class="help-name">बाल सहायता</div><div class="help-desc">बच्चों के शोषण की रिपोर्ट</div></div>
+    </div>
+  </section>
+
+  <!-- AWAAZ DO — LAST SECTION -->
+  <section class="home-section awaaz-section" id="awaazdo">
+    <div class="sec-tag" style="color:#00D68F">📞 आवाज़ दो</div>
+    <h2 class="sec-title">आवाज़ दो — तुरंत मदद पाएं</h2>
+    <p class="sec-desc">खतरे में हैं? बस एक बटन दबाएं — आपके 3 भरोसेमंद लोगों को तुरंत SMS alert मिलेगा।</p>
+
+    <!-- Features -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:36px">
+      <div style="background:#0d1f0d;border:1px solid #00A86B33;border-radius:16px;padding:20px;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">⚡</div>
+        <div style="color:#00D68F;font-size:14px;font-weight:600;margin-bottom:6px">10 सेकंड में Alert</div>
+        <div style="color:#4a6a4a;font-size:12px;line-height:1.6">Button दबाते ही तुरंत तीनों contacts को SMS।</div>
+      </div>
+      <div style="background:#0d1f0d;border:1px solid #00A86B33;border-radius:16px;padding:20px;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">🆓</div>
+        <div style="color:#00D68F;font-size:14px;font-weight:600;margin-bottom:6px">बिल्कुल मुफ़्त</div>
+        <div style="color:#4a6a4a;font-size:12px;line-height:1.6">कोई charge नहीं — हमेशा के लिए।</div>
+      </div>
+      <div style="background:#0d1f0d;border:1px solid #00A86B33;border-radius:16px;padding:20px;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">🔒</div>
+        <div style="color:#00D68F;font-size:14px;font-weight:600;margin-bottom:6px">पूरी तरह सुरक्षित</div>
+        <div style="color:#4a6a4a;font-size:12px;line-height:1.6">आपकी जानकारी किसी के साथ share नहीं।</div>
+      </div>
+      <div style="background:#0d1f0d;border:1px solid #00A86B33;border-radius:16px;padding:20px;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">📱</div>
+        <div style="color:#00D68F;font-size:14px;font-weight:600;margin-bottom:6px">हर फोन पर काम करे</div>
+        <div style="color:#4a6a4a;font-size:12px;line-height:1.6">Android, iPhone, basic phone — सब पर।</div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div style="margin-top:32px;background:#0d1f0d;border:1px solid #00A86B33;border-radius:20px;padding:24px">
+      <div style="color:#00D68F;font-size:12px;font-weight:700;letter-spacing:2px;margin-bottom:20px">⚙️ यह कैसे काम करता है?</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;text-align:center">
+        <div style="background:#0a2a0a;border:1px solid #00A86B44;border-radius:12px;padding:14px 16px;min-width:110px">
+          <div style="font-size:24px;margin-bottom:6px">👩</div>
+          <div style="color:#00D68F;font-size:11px;font-weight:600">महिला</div>
+          <div style="color:#4a6a4a;font-size:10px;margin-top:3px">Button दबाती है</div>
+        </div>
+        <div style="color:#00D68F;font-size:18px">→</div>
+        <div style="background:#0a2a0a;border:1px solid #00A86B44;border-radius:12px;padding:14px 16px;min-width:110px">
+          <div style="font-size:24px;margin-bottom:6px">🌐</div>
+          <div style="color:#00D68F;font-size:11px;font-weight:600">Website</div>
+          <div style="color:#4a6a4a;font-size:10px;margin-top:3px">Request भेजती है</div>
+        </div>
+        <div style="color:#00D68F;font-size:18px">→</div>
+        <div style="background:#0a2a0a;border:1px solid #00A86B44;border-radius:12px;padding:14px 16px;min-width:110px">
+          <div style="font-size:24px;margin-bottom:6px">🖥️</div>
+          <div style="color:#00D68F;font-size:11px;font-weight:600">Server</div>
+          <div style="color:#4a6a4a;font-size:10px;margin-top:3px">Contacts ढूंढता है</div>
+        </div>
+        <div style="color:#00D68F;font-size:18px">→</div>
+        <div style="background:#0a2a0a;border:1px solid #00A86B44;border-radius:12px;padding:14px 16px;min-width:110px">
+          <div style="font-size:24px;margin-bottom:6px">💬</div>
+          <div style="color:#00D68F;font-size:11px;font-weight:600">Fast2SMS</div>
+          <div style="color:#4a6a4a;font-size:10px;margin-top:3px">SMS भेजता है</div>
+        </div>
+        <div style="color:#00D68F;font-size:18px">→</div>
+        <div style="background:#0a2a0a;border:1px solid #00A86B44;border-radius:12px;padding:14px 16px;min-width:110px">
+          <div style="font-size:24px;margin-bottom:6px">🤝</div>
+          <div style="color:#00D68F;font-size:11px;font-weight:600">मदद आती है</div>
+          <div style="color:#4a6a4a;font-size:10px;margin-top:3px">3 contacts alert</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration Form -->
+    <div style="margin-top:32px;background:#0a1f0a;border:1px solid #00A86B33;border-radius:20px;padding:28px 24px">
+      <div style="color:#00D68F;font-size:12px;font-weight:700;letter-spacing:2px;margin-bottom:6px">📝 पहले रजिस्टर करें</div>
+      <p style="color:#4a6a4a;font-size:13px;margin-bottom:24px;line-height:1.6">अपना नाम, नंबर और 3 भरोसेमंद लोगों के नंबर दर्ज करें।</p>
+
+      <div id="awaaz-success" style="display:none;background:#0d2a0d;border:1px solid #00A86B44;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px">
+        <div style="font-size:36px;margin-bottom:8px">✅</div>
+        <div style="color:#00D68F;font-weight:600;font-size:15px">रजिस्ट्रेशन सफल!</div>
+        <div style="color:#4a6a4a;font-size:12px;margin-top:6px;margin-bottom:20px">अब नीचे बटन दबाकर test करें।</div>
+        <div style="background:#0a2a0a;border:1px solid #00A86B44;border-radius:16px;padding:20px">
+          <div style="font-size:13px;color:#00D68F;font-weight:600;margin-bottom:6px">🔴 आवाज़ दो Test करें</div>
+          <div style="font-size:12px;color:#4a6a4a;margin-bottom:16px;line-height:1.6">यह बटन दबाने पर आपके तीनों contacts को तुरंत SMS भेजा जाएगा।</div>
+          <button onclick="triggerAwaazDo()" id="awaazDoBtn" style="width:100%;padding:16px;background:linear-gradient(135deg,#FF3366,#cc0033);border:none;border-radius:12px;color:white;font-family:'Noto Sans Devanagari',sans-serif;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px #FF336633;transition:all 0.2s">
+            🆘 आवाज़ दो — मदद चाहिए!
+          </button>
+          <div id="awaazDoStatus" style="margin-top:12px;font-size:12px;color:#4a6a4a;min-height:20px;text-align:center"></div>
+        </div>
+      </div>
+
+      <div id="awaaz-form-fields">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div>
+            <label style="color:#00A86B;font-size:11px;font-weight:600;letter-spacing:0.5px;display:block;margin-bottom:6px">आपका नाम *</label>
+            <input type="text" id="af-name" placeholder="जैसे: सुनीता देवी" style="width:100%;background:#061506;border:1px solid #00A86B33;border-radius:10px;padding:11px 13px;color:#a0d0a0;font-family:'Noto Sans Devanagari',sans-serif;font-size:13px;outline:none" onfocus="this.style.borderColor='#00A86B'" onblur="this.style.borderColor='#00A86B33'">
+          </div>
+          <div>
+            <label style="color:#00A86B;font-size:11px;font-weight:600;letter-spacing:0.5px;display:block;margin-bottom:6px">आपका फोन नंबर *</label>
+            <input type="tel" id="af-phone" placeholder="10 अंकों का नंबर" style="width:100%;background:#061506;border:1px solid #00A86B33;border-radius:10px;padding:11px 13px;color:#a0d0a0;font-family:'Noto Sans Devanagari',sans-serif;font-size:13px;outline:none" onfocus="this.style.borderColor='#00A86B'" onblur="this.style.borderColor='#00A86B33'">
+          </div>
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="color:#00A86B;font-size:11px;font-weight:600;letter-spacing:0.5px;display:block;margin-bottom:6px">आपका जिला / शहर *</label>
+          <input type="text" id="af-address" placeholder="जैसे: रायपुर, छत्तीसगढ़" style="width:100%;background:#061506;border:1px solid #00A86B33;border-radius:10px;padding:11px 13px;color:#a0d0a0;font-family:'Noto Sans Devanagari',sans-serif;font-size:13px;outline:none" onfocus="this.style.borderColor='#00A86B'" onblur="this.style.borderColor='#00A86B33'">
+        </div>
+        <div style="margin:18px 0 8px;color:#00A86B;font-size:11px;font-weight:700;letter-spacing:1px">🆘 3 आपातकालीन संपर्क नंबर *</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:28px;height:28px;background:linear-gradient(135deg,#00A86B,#006B44);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0">1</div>
+            <input type="tel" id="af-c1" placeholder="पहले भरोसेमंद का नंबर" style="flex:1;background:#061506;border:1px solid #00A86B33;border-radius:10px;padding:11px 13px;color:#a0d0a0;font-family:'Noto Sans Devanagari',sans-serif;font-size:13px;outline:none" onfocus="this.style.borderColor='#00A86B'" onblur="this.style.borderColor='#00A86B33'">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:28px;height:28px;background:linear-gradient(135deg,#00A86B,#006B44);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0">2</div>
+            <input type="tel" id="af-c2" placeholder="दूसरे भरोसेमंद का नंबर" style="flex:1;background:#061506;border:1px solid #00A86B33;border-radius:10px;padding:11px 13px;color:#a0d0a0;font-family:'Noto Sans Devanagari',sans-serif;font-size:13px;outline:none" onfocus="this.style.borderColor='#00A86B'" onblur="this.style.borderColor='#00A86B33'">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:28px;height:28px;background:linear-gradient(135deg,#00A86B,#006B44);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0">3</div>
+            <input type="tel" id="af-c3" placeholder="तीसरे भरोसेमंद का नंबर" style="flex:1;background:#061506;border:1px solid #00A86B33;border-radius:10px;padding:11px 13px;color:#a0d0a0;font-family:'Noto Sans Devanagari',sans-serif;font-size:13px;outline:none" onfocus="this.style.borderColor='#00A86B'" onblur="this.style.borderColor='#00A86B33'">
+          </div>
+        </div>
+        <div id="awaaz-error" style="display:none;color:#ff6b6b;font-size:12px;margin-bottom:12px;padding:10px;background:#2a0a0a;border-radius:8px;border:1px solid #ff333333"></div>
+        <button onclick="submitAwaazForm()" style="width:100%;padding:14px;background:linear-gradient(135deg,#00A86B,#006B44);border:none;border-radius:12px;color:white;font-family:'Noto Sans Devanagari',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px #00A86B33" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          📝 रजिस्टर करें — आवाज़ दो
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="home-footer">
+    <h2>SURAKSHIT AWAAZ</h2>
+    <p>बनाया गया <span>❤️</span> के साथ — भारत की सुरक्षा के लिए 🇮🇳</p>
+    <p style="margin-top:10px;font-size:13px;color:#6b4a2a">✨ Created by <span style="color:#FF6B00;font-weight:600">Vijayashree</span></p>
+  </div>
+</div>
+
+<!-- CYBER PAGE -->
+<div id="page-cyber" class="page">
+  <div class="cyber-wrap">
+    <div class="cyber-header">
+      <div class="c-header-top"><div class="c-logo">🛡️</div><div><div class="c-title">सुरक्षा साथी</div><div class="c-sub">CYBER CRIME AWARENESS · हिंदी AI सहायक</div></div></div>
+      <div class="c-status"><div class="c-dot"></div><span class="c-status-text">ONLINE · सक्रिय</span></div>
+      <div class="c-pills"><span class="c-pill cp-red">🆘 1930 Cyber</span><span class="c-pill cp-cyan">📞 1091 Women</span></div>
+    </div>
+    <div class="c-chat" id="cyberChat">
+      <div class="msg msg-bot"><div class="msg-av cav-bot">🛡️</div><div class="msg-bubble cbub-bot">नमस्ते! मैं सुरक्षा साथी हूँ। आप मुझसे साइबर अपराध, UPI fraud या डिजिटल सुरक्षा से जुड़ा कोई भी सवाल हिंदी में पूछ सकते हैं। 🛡️</div></div>
+    </div>
+    <div class="c-input-area">
+      <div class="c-input-wrap">
+        <textarea class="c-textarea" id="cyberInput" placeholder="यहाँ टाइप करें या माइक दबाकर बोलें..." rows="2"></textarea>
+        <div class="c-actions"><button class="c-mic" id="cyberMic" onclick="requestMicAndStart('cyber')">🎙️ हिंदी में बोलें</button><button class="c-send" id="cyberSend" onclick="sendMsg('cyber')">➤</button></div>
+      </div>
+      <div class="c-voice-status" id="cyberVoiceStatus"></div>
+    </div>
+    <div class="c-footer"><p>⚠️ केवल साइबर अपराध और डिजिटल सुरक्षा विषयों पर। <strong>cybercrime.gov.in</strong> | <strong>1930</strong></p></div>
+  </div>
+</div>
+
+<!-- SAHARA PAGE -->
+<div id="page-sahara" class="page">
+  <div class="sahara-wrap">
+    <div class="s-header">
+      <div class="s-header-top"><div class="s-logo">🌸</div><div><div class="s-title"><span>साहारा</span></div><div class="s-sub">आपकी सुरक्षित सहेली — महिला सुरक्षा सहायक</div></div></div>
+      <div class="s-status"><div class="s-dot"></div><span class="s-status-text">हमेशा आपके साथ</span></div>
+      <div class="s-pills"><span class="s-pill sp-rose">🆘 महिला हेल्पलाइन: 1091</span><span class="s-pill sp-purple">💜 घरेलू हिंसा: 181</span></div>
+    </div>
+    <div class="s-chat" id="saharaChat">
+      <div class="msg msg-bot"><div class="msg-av sav-bot">🌸</div><div class="msg-bubble sbub-bot">नमस्ते। मैं साहारा हूँ। आप यहाँ सुरक्षित हैं। बिना किसी डर के मुझसे बात करें — मैं आपकी मदद के लिए यहाँ हूँ। 🤝</div></div>
+    </div>
+    <div class="s-input-area">
+      <div class="s-input-wrap">
+        <textarea class="s-textarea" id="saharaInput" placeholder="यहाँ टाइप करें या माइक दबाकर बोलें..." rows="2"></textarea>
+        <div class="s-actions"><button class="s-mic" id="saharaMic" onclick="requestMicAndStart('sahara')">🎙️ हिंदी में बोलें</button><button class="s-send" id="saharaSend" onclick="sendMsg('sahara')">➤</button></div>
+      </div>
+      <div class="s-voice-status" id="saharaVoiceStatus"></div>
+    </div>
+    <div class="s-footer"><p>⚠️ केवल महिला सुरक्षा, घरेलू हिंसा और बाल सुरक्षा विषयों पर।<br>आपातकाल: <strong>1091</strong> | <strong>100</strong></p></div>
+  </div>
+</div>
+
+<!-- PWA INSTALL BANNER -->
+<div class="pwa-banner" id="pwaBanner" style="display:none">
+  <div class="pwa-text">
+    📱 App की तरह Install करें
+    <span>Home screen पर add करें — बिना internet भी चलेगा</span>
+  </div>
+  <div class="pwa-btns">
+    <button class="pwa-install" onclick="installPWA()">Install</button>
+    <button class="pwa-dismiss" onclick="dismissPWA()">✕</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="showPage('home')"><span class="nav-icon">🏠</span><span class="nav-label">होम</span></button>
+  <button class="nav-btn" id="nav-cyber" onclick="showPage('cyber')"><span class="nav-icon">🛡️</span><span class="nav-label">सुरक्षा साथी</span></button>
+  <button class="nav-btn" id="nav-sahara" onclick="showPage('sahara')"><span class="nav-icon">🌸</span><span class="nav-label">साहारा</span></button>
+</nav>
+
+<script>
+const GROQ_API_KEY = "paste_your_groq_key_here";
+
+const CYBER_PROMPT = `आप सुरक्षा साथी हैं — एक हिंदी साइबर सुरक्षा सहायक।
+नियम:
+1. हमेशा सरल हिंदी में जवाब दें
+2. केवल: साइबर अपराध, UPI fraud, OTP scam, social media safety, डिजिटल सुरक्षा
+3. अन्य विषय पर विनम्रता से मना करें
+4. हेल्पलाइन: 1930, 1091, cybercrime.gov.in
+5. छोटे और स्पष्ट जवाब दें`;
+
+const SAHARA_PROMPT = `आप साहारा हैं — एक हिंदी महिला सुरक्षा सहायक।
+नियम:
+1. हमेशा गर्मजोशी भरी सरल हिंदी में जवाब दें
+2. केवल: घरेलू हिंसा, महिला उत्पीड़न, बाल शोषण, महिला अधिकार, सुरक्षा
+3. सहेली की तरह बात करें — हिम्मत दें
+4. हेल्पलाइन: 1091, 100, 181, 1098
+5. "आप अकेली नहीं हैं" जैसे शब्द इस्तेमाल करें`;
+
+let cyberHistory=[], saharaHistory=[];
+let activeRec=null;
+let currentType=null;
+
+// ── PWA INSTALL ──
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  setTimeout(()=>document.getElementById('pwaBanner').style.display='flex',3000);
+});
+function installPWA(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{deferredPrompt=null;dismissPWA();});
+}
+function dismissPWA(){document.getElementById('pwaBanner').style.display='none';}
+
+// ── PAGE TRANSITIONS ──
+function showPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active','entering'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const target=document.getElementById('page-'+page);
+  target.classList.add('active');
+  setTimeout(()=>target.classList.add('entering'),10);
+  document.getElementById('nav-'+page).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── DAILY SAFETY TIP ──
+const tips=[
+  "OTP किसी को भी न बताएं — चाहे वो बैंक कर्मचारी ही क्यों न हो। असली बैंक कभी OTP नहीं माँगता।",
+  "अनजान नंबर से आए WhatsApp link पर कभी click न करें — यह आपका phone hack कर सकता है।",
+  "Lottery जीतने का message हमेशा fraud होता है। कोई असली lottery बिना ticket के नहीं मिलती।",
+  "Public WiFi पर banking कभी न करें। हैकर आपका password चुरा सकते हैं।",
+  "अपना Aadhaar number किसी अनजान को न दें — इससे आपकी identity चोरी हो सकती है।",
+  "Phone पर कोई भी screen share करने को कहे तो तुरंत मना करें — यह bank fraud का तरीका है।",
+  "Social media पर अपना घर का address और phone number share न करें।",
+  "अनजान number से video call आए तो उठाने से पहले सोचें — blackmail का खतरा हो सकता है।",
+  "बिजली काटने की धमकी देने वाला call हमेशा fraud होता है। बिजली विभाग ऐसे call नहीं करता।",
+  "Free recharge या prize के लिए personal information माँगने वाली site fraud है।",
+  "अपने बच्चों को online gaming में अनजान लोगों से बात न करने दें।",
+  "UPI PIN कभी किसी के साथ share न करें — पैसे receive करने के लिए PIN की जरूरत नहीं होती।",
+  "Phone में हमेशा latest software update रखें — पुराने software में hackers आसानी से घुसते हैं।",
+  "Fake customer care numbers से सावधान रहें — हमेशा official website से number लें।",
+  "अपने phone का screen lock हमेशा ON रखें — कम से कम 6 अंकों का PIN लगाएं।"
+];
+function loadDailyTip(){
+  const today=new Date();
+  const dayIndex=today.getDate()%tips.length;
+  const months=['जनवरी','फ़रवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'];
+  document.getElementById('tipDate').textContent=today.getDate()+' '+months[today.getMonth()]+' '+today.getFullYear()+' की टिप';
+  document.getElementById('tipText').textContent=tips[dayIndex];
+}
+
+// ── SURAKSHA SCORE ──
+const questions=[
+  {q:"क्या आप OTP किसी को बताते हैं?",opts:["कभी नहीं","कभी-कभी","हाँ, बता देते हैं"],scores:[10,5,0]},
+  {q:"अनजान link पर click करते हैं?",opts:["कभी नहीं","सोचकर करते हैं","हाँ, करते हैं"],scores:[10,5,0]},
+  {q:"आपके phone में screen lock है?",opts:["हाँ, मजबूत PIN है","हाँ, simple है","नहीं है"],scores:[10,5,0]},
+  {q:"Social media पर address share करते हैं?",opts:["कभी नहीं","कभी-कभी","हाँ करते हैं"],scores:[10,5,0]},
+  {q:"Public WiFi पर banking करते हैं?",opts:["कभी नहीं","कभी-कभी","हाँ करते हैं"],scores:[10,5,0]},
+  {q:"Phone का software update रखते हैं?",opts:["हमेशा अपडेट","कभी-कभी","कभी नहीं"],scores:[10,5,0]},
+  {q:"Lottery या prize message पर विश्वास करते हैं?",opts:["बिल्कुल नहीं","सोचता/सोचती हूँ","हाँ, सच लगता है"],scores:[10,5,0]},
+  {q:"अनजान apps download करते हैं?",opts:["कभी नहीं","कभी-कभी","हाँ करते हैं"],scores:[10,5,0]},
+  {q:"UPI PIN किसी को बताते हैं?",opts:["कभी नहीं","परिवार को बताते हैं","हाँ बताते हैं"],scores:[10,5,0]},
+  {q:"Cyber crime होने पर 1930 पर call करेंगे?",opts:["हाँ, बिल्कुल","शायद","पता नहीं था"],scores:[10,5,0]}
+];
+let currentQ=0,totalScore=0,weakAreas=[];
+function startScoreQuiz(){
+  currentQ=0;totalScore=0;weakAreas=[];
+  document.getElementById('scoreIntro').style.display='none';
+  document.getElementById('scoreProgress').style.display='block';
+  document.getElementById('scoreQuiz').style.display='block';
+  document.getElementById('scoreResult').style.display='none';
+  showQuestion();
+}
+function showQuestion(){
+  if(currentQ>=questions.length){showScoreResult();return;}
+  const q=questions[currentQ];
+  const progress=(currentQ/questions.length)*100;
+  document.getElementById('scoreProgressFill').style.width=progress+'%';
+  document.getElementById('scoreQuiz').innerHTML=`<div class="score-q"><div class="score-q-num">सवाल ${currentQ+1} / ${questions.length}</div><div class="score-q-text">${q.q}</div><div class="score-options">${q.opts.map((opt,i)=>`<button class="score-opt" onclick="answerQ(${i})">${opt}</button>`).join('')}</div></div>`;
+}
+function answerQ(i){
+  const q=questions[currentQ];
+  totalScore+=q.scores[i];
+  if(q.scores[i]<10)weakAreas.push(q.q);
+  currentQ++;
+  setTimeout(showQuestion,300);
+}
+function showScoreResult(){
+  document.getElementById('scoreQuiz').style.display='none';
+  document.getElementById('scoreProgressFill').style.width='100%';
+  const result=document.getElementById('scoreResult');
+  result.style.display='block';
+  document.getElementById('scoreNumber').textContent=totalScore;
+  let grade,color,tipsList;
+  if(totalScore>=80){grade='🟢 बहुत सुरक्षित!';color='#00D68F';tipsList=['आप बहुत सतर्क हैं — बधाई!','दूसरों को भी जागरूक करें','Surakshit Awaaz को share करें'];}
+  else if(totalScore>=50){grade='🟡 सावधान रहें';color='#FFD700';tipsList=['थोड़ी और सावधानी ज़रूरी है','नीचे दी गई कमज़ोरियाँ ठीक करें','हमारे AI सहायक से मदद लें'];}
+  else{grade='🔴 खतरे में हैं!';color='#FF3366';tipsList=['तुरंत सावधानी बरतें','हमारे AI सहायक से मदद लें','1930 नंबर याद रखें'];}
+  document.getElementById('scoreGrade').style.color=color;
+  document.getElementById('scoreGrade').textContent=grade;
+  const tipsHtml=tipsList.map(t=>`<div class="score-tip-item">✓ ${t}</div>`).join('')+weakAreas.slice(0,3).map(w=>`<div class="score-tip-item" style="border-color:#FF3366">⚠️ "${w}" — सुधार करें</div>`).join('');
+  document.getElementById('scoreTips').innerHTML=tipsHtml;
+}
+function shareScore(){
+  const score=document.getElementById('scoreNumber').textContent;
+  const grade=document.getElementById('scoreGrade').textContent;
+  const text=`मेरा Suraksha Score है ${score}/100 ${grade}\n\nआप भी जानें अपना Digital Safety Score:\nhttps://mvijayashreeswami-rgb.github.io/surakshit-awaaz/\n\n— Surakshit Awaaz 🛡️`;
+  window.open('https://wa.me/?text='+encodeURIComponent(text));
+}
+function retryScore(){
+  document.getElementById('scoreResult').style.display='none';
+  document.getElementById('scoreIntro').style.display='block';
+  document.getElementById('scoreProgress').style.display='none';
+}
+
+loadDailyTip();
+
+// Register Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/surakshit-awaaz/sw.js')
+      .then(()=>console.log('SW registered'))
+      .catch(()=>console.log('SW failed'));
+  });
+}
+
+function setMicUI(type, state){
+  const mic=document.getElementById(type+'Mic');
+  const status=document.getElementById(type+'VoiceStatus');
+  if(state==='listening'){
+    mic.textContent='⏹️ रोकें';
+    mic.classList.add('listening');
+    status.textContent='🔴 बोलिए...';
+  } else {
+    mic.textContent='🎙️ हिंदी में बोलें';
+    mic.classList.remove('listening');
+  }
+}
+
+async function requestMicAndStart(type){
+  // If already listening, stop
+  if(activeRec && currentType===type){
+    activeRec.stop();
+    activeRec=null;
+    currentType=null;
+    setMicUI(type,'idle');
+    return;
+  }
+
+  const statusEl=document.getElementById(type+'VoiceStatus');
+
+  // Check browser support
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    statusEl.textContent='⚠️ Chrome browser में खोलें';
+    return;
+  }
+
+  // Request mic permission first
+  try{
+    await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(err){
+    statusEl.textContent='❌ माइक्रोफोन की अनुमति दें';
+    return;
+  }
+
+  // Stop any existing recognition
+  if(activeRec){
+    try{activeRec.stop();}catch(e){}
+    activeRec=null;
+  }
+
+  // Create fresh recognition instance
+  const rec=new SR();
+  rec.lang='hi-IN';
+  rec.continuous=false;
+  rec.interimResults=false;
+  rec.maxAlternatives=1;
+
+  rec.onstart=()=>{
+    setMicUI(type,'listening');
+  };
+
+  rec.onresult=(e)=>{
+    const text=e.results[0][0].transcript;
+    document.getElementById(type+'Input').value=text;
+    statusEl.textContent='✅ सुन लिया!';
+    activeRec=null;
+    currentType=null;
+    setMicUI(type,'idle');
+    setTimeout(()=>sendMsg(type),600);
+  };
+
+  rec.onerror=(e)=>{
+    statusEl.textContent='❌ '+e.error+' — दोबारा कोशिश करें';
+    activeRec=null;
+    currentType=null;
+    setMicUI(type,'idle');
+  };
+
+  rec.onend=()=>{
+    if(activeRec===rec){
+      activeRec=null;
+      currentType=null;
+      setMicUI(type,'idle');
+    }
+  };
+
+  try{
+    rec.start();
+    activeRec=rec;
+    currentType=type;
+  }catch(e){
+    statusEl.textContent='❌ दोबारा कोशिश करें: '+e.message;
+  }
+}
+
+function speakText(text){
+  if(!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text.replace(/[*_#`]/g,''));
+  u.lang='hi-IN';u.rate=0.9;window.speechSynthesis.speak(u);
+}
+
+function addMsg(chatId,content,isUser,type){
+  const chat=document.getElementById(chatId);
+  const msg=document.createElement('div');
+  msg.className='msg '+(isUser?'msg-user':'msg-bot');
+  const av=document.createElement('div');
+  av.className='msg-av '+(type==='cyber'?(isUser?'cav-user':'cav-bot'):(isUser?'sav-user':'sav-bot'));
+  av.textContent=isUser?'👤':(type==='cyber'?'🛡️':'🌸');
+  const bubble=document.createElement('div');
+  bubble.className='msg-bubble '+(type==='cyber'?(isUser?'cbub-user':'cbub-bot'):(isUser?'sbub-user':'sbub-bot'));
+  bubble.textContent=content;
+  msg.appendChild(av);msg.appendChild(bubble);
+  chat.appendChild(msg);chat.scrollTop=chat.scrollHeight;
+}
+
+function addTyping(chatId,type){
+  const chat=document.getElementById(chatId);
+  const msg=document.createElement('div');
+  msg.className='msg msg-bot';msg.id=chatId+'Typing';
+  const av=document.createElement('div');
+  av.className='msg-av '+(type==='cyber'?'cav-bot':'sav-bot');
+  av.textContent=type==='cyber'?'🛡️':'🌸';
+  const bubble=document.createElement('div');
+  bubble.className='msg-bubble '+(type==='cyber'?'cbub-bot':'sbub-bot');
+  bubble.innerHTML=`<div class="typing-dots ${type==='cyber'?'cdots':'sdots'}"><span></span><span></span><span></span></div>`;
+  msg.appendChild(av);msg.appendChild(bubble);
+  chat.appendChild(msg);chat.scrollTop=chat.scrollHeight;
+}
+
+function removeTyping(chatId){const el=document.getElementById(chatId+'Typing');if(el)el.remove();}
+
+async function sendMsg(type){
+  const input=document.getElementById(type+'Input');
+  const send=document.getElementById(type+'Send');
+  const chatId=type+'Chat';
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';send.disabled=true;
+  addMsg(chatId,text,true,type);
+  const history=type==='cyber'?cyberHistory:saharaHistory;
+  history.push({role:'user',content:text});
+  addTyping(chatId,type);
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_API_KEY}`},
+      body:JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        messages:[{role:'system',content:type==='cyber'?CYBER_PROMPT:SAHARA_PROMPT},...history],
+        max_tokens:500,temperature:0.7
+      })
+    });
+    const data=await res.json();
+    removeTyping(chatId);
+    if(data.choices&&data.choices[0]){
+      const reply=data.choices[0].message.content;
+      history.push({role:'assistant',content:reply});
+      addMsg(chatId,reply,false,type);
+      speakText(reply);
+    }else{
+      addMsg(chatId,'❌ '+(data.error?.message||'कोई जवाब नहीं मिला। दोबारा कोशिश करें।'),false,type);
+    }
+  }catch{
+    removeTyping(chatId);
+    addMsg(chatId,'❌ नेटवर्क की समस्या है। इंटरनेट जाँचें।',false,type);
+  }
+  send.disabled=false;
+}
+
+['cyber','sahara'].forEach(type=>{
+  document.getElementById(type+'Input').addEventListener('keydown',(e)=>{
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg(type);}
+  });
+});
+
+
+// Store registered data for Awaaz Do
+let awaazRegistration = null;
+
+function submitAwaazForm(){
+  const name=document.getElementById('af-name').value.trim();
+  const phone=document.getElementById('af-phone').value.trim();
+  const address=document.getElementById('af-address').value.trim();
+  const c1=document.getElementById('af-c1').value.trim();
+  const c2=document.getElementById('af-c2').value.trim();
+  const c3=document.getElementById('af-c3').value.trim();
+  const errEl=document.getElementById('awaaz-error');
+  if(!name||!phone||!address||!c1||!c2||!c3){
+    errEl.style.display='block';
+    errEl.textContent='⚠️ कृपया सभी जानकारी भरें — सभी fields ज़रूरी हैं।';
+    return;
+  }
+  if(phone.length<10||isNaN(phone)){
+    errEl.style.display='block';
+    errEl.textContent='⚠️ कृपया सही 10 अंकों का फोन नंबर दर्ज करें।';
+    return;
+  }
+  errEl.style.display='none';
+  awaazRegistration={name,phone,address,contacts:[c1,c2,c3]};
+  document.getElementById('awaaz-form-fields').style.display='none';
+  document.getElementById('awaaz-success').style.display='block';
+}
+
+async function triggerAwaazDo(){
+  const btn=document.getElementById('awaazDoBtn');
+  const status=document.getElementById('awaazDoStatus');
+  if(!awaazRegistration){
+    status.textContent='❌ पहले रजिस्टर करें।';
+    return;
+  }
+  btn.disabled=true;
+  btn.textContent='⏳ SMS भेजा जा रहा है...';
+  btn.style.background='#333';
+  status.textContent='🔄 आपके contacts को alert किया जा रहा है...';
+  try{
+    const res=await fetch('https://surakshit-awaaz-server-production.up.railway.app/send-alert',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name:awaazRegistration.name,
+        contacts:awaazRegistration.contacts
+      })
+    });
+    let data;
+    try{data=await res.json();}catch(e){data={};}
+    if(res.ok && data.success){
+      btn.textContent='✅ SMS भेज दिया गया!';
+      btn.style.background='linear-gradient(135deg,#00A86B,#006B44)';
+      status.textContent='✅ आपके तीनों contacts को SMS मिल गया। मदद आ रही है!';
+    }else{
+      btn.textContent='🆘 आवाज़ दो — मदद चाहिए!';
+      btn.style.background='linear-gradient(135deg,#FF3366,#cc0033)';
+      btn.disabled=false;
+      status.textContent='❌ Server error: '+(data.error||res.status)+' — दोबारा कोशिश करें।';
+    }
+  }catch(e){
+    btn.textContent='🆘 आवाज़ दो — मदद चाहिए!';
+    btn.style.background='linear-gradient(135deg,#FF3366,#cc0033)';
+    btn.disabled=false;
+    status.textContent='❌ Connection error: '+e.message+' — इंटरनेट जाँचें।';
+  }
+}
+
+
+</script>
+</body>
+</html>
