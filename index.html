@@ -1045,7 +1045,8 @@ const res = await fetch('https://surakshit-awaaz-server-production.up.railway.ap
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-        numbers: phoneNumbers
+        // The brackets [ ] fix your 400 error instantly!
+        numbers: Array.isArray(phoneNumbers) ? phoneNumbers : [phoneNumbers]
     })
 });
     let data;
@@ -1053,12 +1054,12 @@ const res = await fetch('https://surakshit-awaaz-server-production.up.railway.ap
     if(res.ok && data.success){
       btn.textContent='✅ SMS भेज दिया गया!';
       btn.style.background='linear-gradient(135deg,#00A86B,#006B44)';
-      status.textContent='✅ आपके तीनों contacts को SMS मिल गया। मदद आ रही है!';
+      status.textContent='✅ आपके contacts को SMS मिल गया। मदद आ रही है!';
     }else{
       btn.textContent='🆘 आवाज़ दो — मदद चाहिए!';
       btn.style.background='linear-gradient(135deg,#FF3366,#cc0033)';
       btn.disabled=false;
-      status.textContent='❌ Server error: '+(data.error||res.status)+' — दोबारा कोशिश करें।';
+      status.textContent='❌ Server error: '+(data.message||data.error||res.status)+' — दोबारा कोशिश करें।';
     }
   }catch(e){
     btn.textContent='🆘 आवाज़ दो — मदद चाहिए!';
@@ -1067,7 +1068,6 @@ const res = await fetch('https://surakshit-awaaz-server-production.up.railway.ap
     status.textContent='❌ Connection error: '+e.message+' — इंटरनेट जाँचें।';
   }
 }
-
 
 </script>
 </body>
