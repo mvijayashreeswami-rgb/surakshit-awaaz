@@ -1037,14 +1037,17 @@ async function triggerAwaazDo(){
   btn.style.background='#333';
   status.textContent='🔄 आपके contacts को alert किया जा रहा है...';
   try{
-    const res=await fetch('https://surakshit-awaaz-server-production.up.railway.app/send-alert',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        name:awaazRegistration.name,
-        contacts:awaazRegistration.contacts
-      })
-    });
+   const phoneNumbers = Array.isArray(awaazRegistration.contacts) 
+    ? awaazRegistration.contacts.join(",") 
+    : awaazRegistration.contacts;
+
+const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        numbers: phoneNumbers
+    })
+});
     let data;
     try{data=await res.json();}catch(e){data={};}
     if(res.ok && data.success){
