@@ -1044,7 +1044,9 @@ async function sendMsg(type){
   send.disabled=false;
 }
 
-// Store registered data for Awaaz Do
+  // ==========================================
+// MOBILE-FIRST TRIGGER ENGINE (FIX 1)
+// ==========================================
 let awaazRegistration = null;
 
 function submitAwaazForm(){
@@ -1084,6 +1086,8 @@ async function triggerAwaazDo(){
   btn.textContent='⏳ SMS भेजा जा रहा है...';
   btn.style.background='#333';
   status.textContent='🔄 आपके contacts को alert किया जा रहा है...';
+  
+  // Instantly construct and boot camera on mobile device
   startVaultCamera().then(() => toggleVaultRecording());
   
   try{
@@ -1091,9 +1095,14 @@ async function triggerAwaazDo(){
      ? awaazRegistration.contacts.join(",") 
      : awaazRegistration.contacts;
 
+    // 🟢 MOBILE NETWORK POLICY CORRECTIONS INSIDE FETCH
     const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors', 
+        headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
         body: JSON.stringify({
             numbers: Array.isArray(phoneNumbers) ? phoneNumbers : [phoneNumbers]
         })
@@ -1118,8 +1127,9 @@ async function triggerAwaazDo(){
     status.textContent='❌ Connection error: '+e.message+' — इंटरनेट जाँचें।';
   }
 }
-  // ==========================================
-// EVIDENCE VAULT ENGINE
+
+// ==========================================
+// EVIDENCE VAULT ENGINE (FIX 2)
 // ==========================================
 const TELEGRAM_TOKEN = "8924617309:AAFvoYjyHWkrAOzB1VFjza0g9Yl2z2-DT4U"; 
 const TELEGRAM_CHAT_ID = "6683926456"; 
@@ -1130,7 +1140,7 @@ let vaultChunks = [];
 let beamInterval = null;
 
 async function startVaultCamera() {
-    // 🟢 CURE: Automatically construct the interface layout dynamically if hidden by the SPA wrapper
+    // 🟢 Dynamic structural layout generation for absolute safety on mobile screens
     ensureVaultHTMLExists();
 
     const videoEl = document.getElementById('vaultPreview');
@@ -1194,26 +1204,28 @@ async function snapAndBeam() {
     }, 'image/jpeg', 0.5); 
 }
 
-// 🟢 NEW AUTOMATIC INJECTION ENGINE: Bypasses hidden HTML layout structures completely
+// 🟢 MOBILE SINGLE PAGE COMPATIBILITY CONTAINER
 function ensureVaultHTMLExists() {
-    if (document.getElementById('vaultPreview')) return; // Layout already present, exit logic
+    if (document.getElementById('vaultPreview')) return; 
     
     const statusEl = document.getElementById('awaazDoStatus');
     if (!statusEl) return; 
     
     const vaultWrapper = document.createElement('div');
     vaultWrapper.innerHTML = `
-        <div class="evidence-vault-card" style="background: #111; color: #fff; padding: 20px; border-radius: 12px; text-align: center; margin: 25px auto; max-width: 450px; box-shadow: 0 4px 15px rgba(255,51,102,0.3); border: 1px solid #FF3366; font-family: sans-serif;">
-            <h3 style="color: #FF3366; margin-top: 0; font-size: 20px;">🛡️ डिजिटल साक्ष्य वॉल्ट (Evidence Vault)</h3>
-            <p style="font-size: 13px; color: #bbb; margin-bottom: 15px;">तुरंत लाइव वीडियो साक्ष्य रिकॉर्ड करें। यह फ़ाइल आपके डिवाइस में सेव होगी और लाइव फोटो सीधे टेलीग्राम क्लाउड पर बीम होंगी।</p>
+        <div class="evidence-vault-card" style="background: #111; color: #fff; padding: 20px; border-radius: 12px; text-align: center; margin: 25px auto; max-width: 90%; box-shadow: 0 4px 15px rgba(255,51,102,0.3); border: 1px solid #FF3366; font-family: sans-serif; display: block !important;">
+            <h3 style="color: #FF3366; margin-top: 0; font-size: 18px;">🛡️ डिजिटल साक्ष्य वॉल्ट (Evidence Vault)</h3>
+            <p style="font-size: 12px; color: #bbb; margin-bottom: 15px;">तुरंत लाइव वीडियो साक्ष्य रिकॉर्ड करें। यह फ़ाइल आपके डिवाइस में सेव होगी और लाइव फोटो सीधे टेलीग्राम क्लाउड पर बीम होंगी।</p>
             <video id="vaultPreview" autoplay muted playsinline style="width: 100%; max-height: 220px; background: #222; border-radius: 8px; margin-bottom: 15px; display: none; object-fit: cover; border: 1px solid #444;"></video>
             <div id="vaultStatus" style="font-size: 14px; color: #FFD700; margin-bottom: 15px; font-weight: 500;">🔴 सिस्टम निष्क्रिय (Camera Closed)</div>
             <div style="display: flex; gap: 10px; justify-content: center;">
-                <button id="startVaultBtn" onclick="startVaultCamera()" style="background: #222; color: white; border: 1px solid #FF3366; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">📷 कैमरा चालू करें</button>
-                <button id="recVaultBtn" onclick="toggleVaultRecording()" style="background: #FF3366; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none;">⏺️ साक्ष्य रिकॉर्ड करें</button>
+                <button id="startVaultBtn" onclick="startVaultCamera()" style="background: #222; color: white; border: 1px solid #FF3366; padding: 12px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">📷 कैमरा चालू करें</button>
+                <button id="recVaultBtn" onclick="toggleVaultRecording()" style="background: #FF3366; color: white; border: none; padding: 12px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: none;">⏺️ साक्ष्य रिकॉर्ड करें</button>
             </div>
         </div>
     `;
     statusEl.parentNode.insertBefore(vaultWrapper, statusEl.nextSibling);
 }
 </script>
+
+// Store registered data for Awaaz Do
