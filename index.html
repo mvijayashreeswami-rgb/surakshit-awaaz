@@ -705,23 +705,33 @@ let deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',(e)=>{
   e.preventDefault();
   deferredPrompt=e;
-  setTimeout(()=>document.getElementById('pwaBanner').style.display='flex',3000);
+  setTimeout(()=>{
+    const banner = document.getElementById('pwaBanner');
+    if(banner) banner.style.display='flex';
+  },3000);
 });
+
 function installPWA(){
   if(!deferredPrompt)return;
   deferredPrompt.prompt();
   deferredPrompt.userChoice.then(()=>{deferredPrompt=null;dismissPWA();});
 }
-function dismissPWA(){document.getElementById('pwaBanner').style.display='none';}
+function dismissPWA(){
+  const banner = document.getElementById('pwaBanner');
+  if(banner) banner.style.display='none';
+}
 
 // ── PAGE TRANSITIONS ──
 function showPage(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active','entering'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   const target=document.getElementById('page-'+page);
-  target.classList.add('active');
-  setTimeout(()=>target.classList.add('entering'),10);
-  document.getElementById('nav-'+page).classList.add('active');
+  if(target){
+    target.classList.add('active');
+    setTimeout(()=>target.classList.add('entering'),10);
+  }
+  const navBtn = document.getElementById('nav-'+page);
+  if(navBtn) navBtn.classList.add('active');
   window.scrollTo(0,0);
 }
 
@@ -743,12 +753,17 @@ const tips=[
   "Fake customer care numbers से सावधान रहें — हमेशा official website से number लें।",
   "अपने phone का screen lock हमेशा ON रखें — कम से कम 6 अंकों का PIN लगाएं।"
 ];
+
 function loadDailyTip(){
   const today=new Date();
   const dayIndex=today.getDate()%tips.length;
   const months=['जनवरी','फ़रवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'];
-  document.getElementById('tipDate').textContent=today.getDate()+' '+months[today.getMonth()]+' '+today.getFullYear()+' की टिप';
-  document.getElementById('tipText').textContent=tips[dayIndex];
+  
+  const tipDateEl = document.getElementById('tipDate');
+  const tipTextEl = document.getElementById('tipText');
+  
+  if(tipDateEl) tipDateEl.textContent=today.getDate()+' '+months[today.getMonth()]+' '+today.getFullYear()+' की टिप';
+  if(tipTextEl) tipTextEl.textContent=tips[dayIndex];
 }
 
 // ── SURAKSHA SCORE ──
@@ -765,6 +780,7 @@ const questions=[
   {q:"Cyber crime होने पर 1930 पर call करेंगे?",opts:["हाँ, बिल्कुल","शायद","पता नहीं था"],scores:[10,5,0]}
 ];
 let currentQ=0,totalScore=0,weakAreas=[];
+
 function startScoreQuiz(){
   currentQ=0;totalScore=0;weakAreas=[];
   document.getElementById('scoreIntro').style.display='none';
@@ -773,6 +789,7 @@ function startScoreQuiz(){
   document.getElementById('scoreResult').style.display='none';
   showQuestion();
 }
+
 function showQuestion(){
   if(currentQ>=questions.length){showScoreResult();return;}
   const q=questions[currentQ];
@@ -780,6 +797,7 @@ function showQuestion(){
   document.getElementById('scoreProgressFill').style.width=progress+'%';
   document.getElementById('scoreQuiz').innerHTML=`<div class="score-q"><div class="score-q-num">सवाल ${currentQ+1} / ${questions.length}</div><div class="score-q-text">${q.q}</div><div class="score-options">${q.opts.map((opt,i)=>`<button class="score-opt" onclick="answerQ(${i})">${opt}</button>`).join('')}</div></div>`;
 }
+
 function answerQ(i){
   const q=questions[currentQ];
   totalScore+=q.scores[i];
@@ -787,6 +805,7 @@ function answerQ(i){
   currentQ++;
   setTimeout(showQuestion,300);
 }
+
 function showScoreResult(){
   document.getElementById('scoreQuiz').style.display='none';
   document.getElementById('scoreProgressFill').style.width='100%';
@@ -802,32 +821,24 @@ function showScoreResult(){
   const tipsHtml=tipsList.map(t=>`<div class="score-tip-item">✓ ${t}</div>`).join('')+weakAreas.slice(0,3).map(w=>`<div class="score-tip-item" style="border-color:#FF3366">⚠️ "${w}" — सुधार करें</div>`).join('');
   document.getElementById('scoreTips').innerHTML=tipsHtml;
 }
+
 function shareScore(){
   const score=document.getElementById('scoreNumber').textContent;
   const grade=document.getElementById('scoreGrade').textContent;
-  const text=`मेरा Suraksha Score है ${score}/100 ${grade}\n\nआप भी जानें अपना Digital Safety Score:\nhttps://mvijayashreeswami-rgb.github.io/surakshit-awaaz/\n\n— Surakshit Awaaz 🛡️`;
+  const text=`मेरा Suraksha Score है ${score}/100 ${grade}\n\nआप भी जानें अपना Digital Safety Score:\nhttps://mvijayashreeswami-rgb.github.io/surakshit-awaaz/nn— Surakshit Awaaz 🛡️`;
   window.open('https://wa.me/?text='+encodeURIComponent(text));
 }
+
 function retryScore(){
   document.getElementById('scoreResult').style.display='none';
   document.getElementById('scoreIntro').style.display='block';
   document.getElementById('scoreProgress').style.display='none';
 }
 
-loadDailyTip();
-
-// Register Service Worker
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/surakshit-awaaz/sw.js')
-      .then(()=>console.log('SW registered'))
-      .catch(()=>console.log('SW failed'));
-  });
-}
-
 function setMicUI(type, state){
   const mic=document.getElementById(type+'Mic');
   const status=document.getElementById(type+'VoiceStatus');
+  if(!mic || !status) return;
   if(state==='listening'){
     mic.textContent='⏹️ रोकें';
     mic.classList.add('listening');
@@ -839,7 +850,6 @@ function setMicUI(type, state){
 }
 
 async function requestMicAndStart(type){
-  // If already listening, stop
   if(activeRec && currentType===type){
     activeRec.stop();
     activeRec=null;
@@ -849,15 +859,12 @@ async function requestMicAndStart(type){
   }
 
   const statusEl=document.getElementById(type+'VoiceStatus');
-
-  // Check browser support
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){
     statusEl.textContent='⚠️ Chrome browser में खोलें';
     return;
   }
 
-  // Request mic permission first
   try{
     await navigator.mediaDevices.getUserMedia({audio:true});
   }catch(err){
@@ -865,22 +872,18 @@ async function requestMicAndStart(type){
     return;
   }
 
-  // Stop any existing recognition
   if(activeRec){
     try{activeRec.stop();}catch(e){}
     activeRec=null;
   }
 
-  // Create fresh recognition instance
   const rec=new SR();
   rec.lang='hi-IN';
   rec.continuous=false;
   rec.interimResults=false;
   rec.maxAlternatives=1;
 
-  rec.onstart=()=>{
-    setMicUI(type,'listening');
-  };
+  rec.onstart=()=>{ setMicUI(type,'listening'); };
 
   rec.onresult=(e)=>{
     const text=e.results[0][0].transcript;
@@ -923,8 +926,34 @@ function speakText(text){
   u.lang='hi-IN';u.rate=0.9;window.speechSynthesis.speak(u);
 }
 
+// ── INITIALIZATION WRAPPER (THE FIX) ──
+window.addEventListener('load', () => {
+  // Safe load for daily tip
+  loadDailyTip();
+
+  // Safe register for Service Worker
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/surakshit-awaaz/sw.js')
+      .then(()=>console.log('SW registered'))
+      .catch(()=>console.log('SW failed'));
+  }
+
+  // Safe binding for input fields
+  ['cyber','sahara'].forEach(type=>{
+    const inputEl = document.getElementById(type+'Input');
+    if(inputEl) {
+      inputEl.addEventListener('keydown',(e)=>{
+        if(e.key==='Enter' && !e.shiftKey){e.preventDefault();sendMsg(type);}
+      });
+    }
+  });
+  
+  console.log("Surakshit Awaaz Core Components Safely Loaded.");
+});
+
 function addMsg(chatId,content,isUser,type){
   const chat=document.getElementById(chatId);
+  if(!chat) return;
   const msg=document.createElement('div');
   msg.className='msg '+(isUser?'msg-user':'msg-bot');
   const av=document.createElement('div');
@@ -939,6 +968,7 @@ function addMsg(chatId,content,isUser,type){
 
 function addTyping(chatId,type){
   const chat=document.getElementById(chatId);
+  if(!chat) return;
   const msg=document.createElement('div');
   msg.className='msg msg-bot';msg.id=chatId+'Typing';
   const av=document.createElement('div');
@@ -957,13 +987,21 @@ async function sendMsg(type){
   const input=document.getElementById(type+'Input');
   const send=document.getElementById(type+'Send');
   const chatId=type+'Chat';
+  if(!input || !send) return;
   const text=input.value.trim();
   if(!text)return;
+  
+  if(!GROQ_API_KEY) {
+     addMsg(chatId,'❌ Error: Configuration key missing. Please check your setup.',false,type);
+     return;
+  }
+
   input.value='';send.disabled=true;
   addMsg(chatId,text,true,type);
   const history=type==='cyber'?cyberHistory:saharaHistory;
   history.push({role:'user',content:text});
   addTyping(chatId,type);
+  
   try{
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
@@ -990,13 +1028,6 @@ async function sendMsg(type){
   }
   send.disabled=false;
 }
-
-['cyber','sahara'].forEach(type=>{
-  document.getElementById(type+'Input').addEventListener('keydown',(e)=>{
-    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg(type);}
-  });
-});
-
 
 // Store registered data for Awaaz Do
 let awaazRegistration = null;
@@ -1028,6 +1059,8 @@ function submitAwaazForm(){
 async function triggerAwaazDo(){
   const btn=document.getElementById('awaazDoBtn');
   const status=document.getElementById('awaazDoStatus');
+  if(!btn || !status) return;
+  
   if(!awaazRegistration){
     status.textContent='❌ पहले रजिस्टर करें।';
     return;
@@ -1036,19 +1069,20 @@ async function triggerAwaazDo(){
   btn.textContent='⏳ SMS भेजा जा रहा है...';
   btn.style.background='#333';
   status.textContent='🔄 आपके contacts को alert किया जा रहा है...';
+  
   try{
-   const phoneNumbers = Array.isArray(awaazRegistration.contacts) 
-    ? awaazRegistration.contacts.join(",") 
-    : awaazRegistration.contacts;
+    const phoneNumbers = Array.isArray(awaazRegistration.contacts) 
+     ? awaazRegistration.contacts.join(",") 
+     : awaazRegistration.contacts;
 
-const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        // The brackets [ ] fix your 400 error instantly!
-        numbers: Array.isArray(phoneNumbers) ? phoneNumbers : [phoneNumbers]
-    })
-});
+    const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            numbers: Array.isArray(phoneNumbers) ? phoneNumbers : [phoneNumbers]
+        })
+    });
+    
     let data;
     try{data=await res.json();}catch(e){data={};}
     if(res.ok && data.success){
@@ -1068,7 +1102,4 @@ const res = await fetch('https://surakshit-awaaz-server-production.up.railway.ap
     status.textContent='❌ Connection error: '+e.message+' — इंटरनेट जाँचें।';
   }
 }
-
 </script>
-</body>
-</html>
