@@ -1131,16 +1131,101 @@ async function triggerAwaazDo(){
 // ==========================================
 // EVIDENCE VAULT ENGINE (FIX 2)
 // ==========================================
+// =========================================================================
+// PERFECTLY INTEGRATED FRONTEND ENGINE: SOS ALERT + MOBILE-FIX EVIDENCE VAULT
+// =========================================================================
 const TELEGRAM_TOKEN = "8924617309:AAFvoYjyHWkrAOzB1VFjza0g9Yl2z2-DT4U"; 
 const TELEGRAM_CHAT_ID = "6683926456"; 
 
+let awaazRegistration = null;
 let vaultStream = null;
 let vaultRecorder = null;
 let vaultChunks = [];
 let beamInterval = null;
 
+function submitAwaazForm(){
+  const name = document.getElementById('af-name').value.trim();
+  const phone = document.getElementById('af-phone').value.trim();
+  const address = document.getElementById('af-address').value.trim();
+  const c1 = document.getElementById('af-c1').value.trim();
+  const c2 = document.getElementById('af-c2').value.trim();
+  const c3 = document.getElementById('af-c3').value.trim();
+  const errEl = document.getElementById('awaaz-error');
+  
+  if(!name || !phone || !address || !c1 || !c2 || !c3){
+    errEl.style.display = 'block';
+    errEl.textContent = '⚠️ कृपया सभी जानकारी भरें — सभी fields ज़रूरी हैं।';
+    return;
+  }
+  if(phone.length < 10 || isNaN(phone)){
+    errEl.style.display = 'block';
+    errEl.textContent = '⚠️ कृपया सही 10 अंकों का फोन नंबर दर्ज करें।';
+    return;
+  }
+  errEl.style.display = 'none';
+  awaazRegistration = { name, phone, address, contacts: [c1, c2, c3] };
+  document.getElementById('awaaz-form-fields').style.display = 'none';
+  document.getElementById('awaaz-success').style.display = 'block';
+}
+
+async function triggerAwaazDo(){
+  const btn = document.getElementById('awaazDoBtn');
+  const status = document.getElementById('awaazDoStatus');
+  if(!btn || !status) return;
+  
+  if(!awaazRegistration){
+    status.textContent = '❌ पहले रजिस्टर करें।';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = '⏳ SMS भेजा जा रहा है...';
+  btn.style.background = '#333';
+  status.textContent = '🔄 आपके contacts को alert किया जा रहा है...';
+  
+  // 🟢 FORCES ENGINE TO INSTANTLY BUILD AND ACTIVATE CAMERA ON MOBILE
+  startVaultCamera().then(() => toggleVaultRecording());
+  
+  try {
+    const phoneNumbers = Array.isArray(awaazRegistration.contacts) 
+     ? awaazRegistration.contacts 
+     : [awaazRegistration.contacts];
+
+    // 🟢 UNBLOCKABLE MOBILE FETCH ROUTING
+    const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
+        method: 'POST',
+        mode: 'cors', 
+        headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            numbers: phoneNumbers
+        })
+    });
+    
+    let data;
+    try { data = await res.json(); } catch(e) { data = {}; }
+    
+    if(res.ok && data.success){
+      btn.textContent = '✅ SMS भेज दिया गया!';
+      btn.style.background = 'linear-gradient(135deg,#00A86B,#006B44)';
+      status.textContent = '✅ आपके contacts को SMS मिल गया। मदद आ रही है!';
+    } else {
+      btn.textContent = '🆘 आवाज़ दो — मदद चाहिए!';
+      btn.style.background = 'linear-gradient(135deg,#FF3366,#cc0033)';
+      btn.disabled = false;
+      status.textContent = '❌ Server error: ' + (data.message || data.error || res.status) + ' — दोबारा कोशिश करें।';
+    }
+  } catch(e) {
+    btn.textContent = '🆘 आवाज़ दो — मदद चाहिए!';
+    btn.style.background = 'linear-gradient(135deg,#FF3366,#cc0033)';
+    btn.disabled = false;
+    status.textContent = '❌ Connection error: ' + e.message + ' — इंटरनेट जाँचें।';
+  }
+}
+
 async function startVaultCamera() {
-    // 🟢 Dynamic structural layout generation for absolute safety on mobile screens
+    // Ensure layout structure explicitly exists on mobile screen tabs
     ensureVaultHTMLExists();
 
     const videoEl = document.getElementById('vaultPreview');
@@ -1204,7 +1289,6 @@ async function snapAndBeam() {
     }, 'image/jpeg', 0.5); 
 }
 
-// 🟢 MOBILE SINGLE PAGE COMPATIBILITY CONTAINER
 function ensureVaultHTMLExists() {
     if (document.getElementById('vaultPreview')) return; 
     
@@ -1227,5 +1311,3 @@ function ensureVaultHTMLExists() {
     statusEl.parentNode.insertBefore(vaultWrapper, statusEl.nextSibling);
 }
 </script>
-
-// Store registered data for Awaaz Do
