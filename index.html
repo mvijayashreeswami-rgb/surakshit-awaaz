@@ -880,17 +880,23 @@ async function requestMicAndStart(type){
     return;
   }
 
-  try{
-    await navigator.mediaDevices.getUserMedia({audio:true});
-  }catch(err){
-    statusEl.textContent='❌ माइक्रोफोन की अनुमति दें';
+try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    if (typeof statusEl !== 'undefined' && statusEl) {
+      statusEl.textContent = '❌ माइक्रोफोन की अनुमति दें';
+    }
     return;
   }
 
-  if(activeRec){
-    try{activeRec.stop();}catch(e){}
-    activeRec=null;
-  }
+  if (activeRec) {
+    try { 
+      activeRec.stop(); 
+    } catch (e) {
+      console.log("Recorder already stopped");
+    }
+    activeRec = null;
+  }  
 
   const rec=new SR();
   rec.lang='hi-IN';
@@ -932,7 +938,7 @@ async function requestMicAndStart(type){
   }catch(e){
     statusEl.textContent='❌ दोबारा कोशिश करें: '+e.message;
   }
-}
+
 
 function speakText(text){
   if(!window.speechSynthesis)return;
