@@ -1095,7 +1095,7 @@ btn.disabled=true;
 btn.textContent='⏳ SMS भेजा जा रहा है...';
 btn.style.background='#333';
 status.textContent='🔄 आपके contacts को alert किया जा रहा है...';
-startVaultCamera().then(() => toggleVaultRecording());
+// startVaultCamera().then(() => toggleVaultRecording());
 
 try{
 const phoneNumbers = Array.isArray(awaazRegistration.contacts)
@@ -1103,7 +1103,7 @@ const phoneNumbers = Array.isArray(awaazRegistration.contacts)
 : awaazRegistration.contacts;
 
 ```
-const res = await fetch('<https://surakshit-awaaz-server-production.up.railway.app/api/sos>', {
+const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
