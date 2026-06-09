@@ -1048,8 +1048,9 @@ async function sendMsg(type){
   send.disabled = false;
 }
 
+<script>
 // =========================================================================
-// INTEGRATED PMRBP FRONTEND ENGINE (FORM + SOS VIA RAILWAY + EVIDENCE VAULT)
+// 1. ENGINE RECOVERY BOUNDARY: GLOBAL VARIABLING
 // =========================================================================
 const TELEGRAM_TOKEN = "8924617309:AAFvoYjyHWkrAOzB1VFjza0g9Yl2z2-DT4U"; 
 const TELEGRAM_CHAT_ID = "6683926456"; 
@@ -1060,6 +1061,39 @@ let vaultRecorder = null;
 let vaultChunks = [];
 let beamInterval = null;
 
+// =========================================================================
+// 2. FIXED NAVIGATION SWITCHBOARD (RESOLVES showPage REFERENCE ERRORS)
+// =========================================================================
+function showPage(pageId) {
+    console.log("Navigating directly to layout panel ID:", pageId);
+    
+    // Scrape all primary application presentation containers
+    const panels = document.querySelectorAll('div[id], section, main, .page, .card');
+    
+    panels.forEach(panel => {
+        if (panel.id && (
+            panel.id === 'awaaz-form-fields' || 
+            panel.id === 'awaaz-success' || 
+            panel.id.toLowerCase().includes('page') || 
+            panel.id.toLowerCase().includes('quiz') || 
+            panel.id.toLowerCase().includes('chat') ||
+            panel.id.toLowerCase().includes('container')
+        )) {
+            panel.style.display = 'none';
+        }
+    });
+
+    const activePanel = document.getElementById(pageId);
+    if (activePanel) {
+        activePanel.style.display = 'block';
+    } else {
+        console.error("FATAL: Target workspace element not found for ID:", pageId);
+    }
+}
+
+// =========================================================================
+// 3. REGISTRATION FLOW ENGINE (RESOLVES submitAwaazForm REFERENCE ERRORS)
+// =========================================================================
 function submitAwaazForm(){
   const name = document.getElementById('af-name').value.trim();
   const phone = document.getElementById('af-phone').value.trim();
@@ -1070,21 +1104,46 @@ function submitAwaazForm(){
   const errEl = document.getElementById('awaaz-error');
   
   if(!name || !phone || !address || !c1 || !c2 || !c3){
-    errEl.style.display = 'block';
-    errEl.textContent = '⚠️ कृपया सभी जानकारी भरें — सभी fields ज़रूरी हैं।';
+    if(errEl) {
+      errEl.style.display = 'block';
+      errEl.textContent = '⚠️ कृपया सभी जानकारी भरें — सभी fields ज़रूरी हैं।';
+    }
     return;
   }
   if(phone.length < 10 || isNaN(phone)){
-    errEl.style.display = 'block';
-    errEl.textContent = '⚠️ कृपया सही 10 अंकों का फोन नंबर दर्ज करें।';
+    if(errEl) {
+      errEl.style.display = 'block';
+      errEl.textContent = '⚠️ कृपया सही 10 अंकों का फोन नंबर दर्ज करें।';
+    }
     return;
   }
-  errEl.style.display = 'none';
+  if(errEl) errEl.style.display = 'none';
   awaazRegistration = { name, phone, address, contacts: [c1, c2, c3] };
-  document.getElementById('awaaz-form-fields').style.display = 'none';
-  document.getElementById('awaaz-success').style.display = 'block';
+  
+  const formFields = document.getElementById('awaaz-form-fields');
+  const successFields = document.getElementById('awaaz-success');
+  if(formFields) formFields.style.display = 'none';
+  if(successFields) successFields.style.display = 'block';
 }
 
+// =========================================================================
+// 4. THE QUIZ ENGINE INSTANTIATOR (RESOLVES startScoreQuiz REFERENCE ERRORS)
+// =========================================================================
+function startScoreQuiz() {
+    console.log("Initializing Quiz Matrix Panel...");
+    // Force immediate focus to your application's quiz section workspace
+    const quizSection = document.getElementById('quiz-page') || document.getElementById('quiz-container') || document.getElementById('quizSection');
+    if (quizSection) {
+        showPage(quizSection.id);
+    } else {
+        // Fallback default redirect to prevent interface freeze if layout name varies
+        showPage('quiz-page');
+    }
+}
+
+// =========================================================================
+// 5. LIVE AUDIO/VIDEO SOS ENGINE & TELEGRAM PIPELINE
+// =========================================================================
 async function triggerAwaazDo(){
   const btn = document.getElementById('awaazDoBtn');
   const status = document.getElementById('awaazDoStatus');
@@ -1095,104 +1154,69 @@ async function triggerAwaazDo(){
     return;
   }
   btn.disabled = true;
-  btn.textContent = '⏳ SMS भेजा जा रहा है...';
-  btn.style.background = '#333';
-  status.textContent = '🔄 आपके contacts को alert किया जा रहा है...';
+  btn.textContent = '⏳ SMS भेजा जा रहा...';
   
-  // Clean initialization of runtime camera engine
   startVaultCamera().then(() => toggleVaultRecording());
   
   try {
-    const phoneNumbers = Array.isArray(awaazRegistration.contacts) 
-     ? awaazRegistration.contacts 
-     : [awaazRegistration.contacts];
-
+    const phoneNumbers = Array.isArray(awaazRegistration.contacts) ? awaazRegistration.contacts : [awaazRegistration.contacts];
     const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
         method: 'POST',
         mode: 'cors', 
-        headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            numbers: phoneNumbers
-        })
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ numbers: phoneNumbers })
     });
     
     let data;
     try { data = await res.json(); } catch(e) { data = {}; }
     
     if(res.ok && data.success){
-      btn.textContent = '✅ SMS भेज दिया गया!';
-      btn.style.background = 'linear-gradient(135deg,#00A86B,#006B44)';
+      btn.textContent = '✅ ALERT SENT!';
       status.textContent = '✅ आपके contacts को SMS मिल गया। मदद आ रही है!';
     } else {
-      btn.textContent = '🆘 आवाज़ दो — मदद चाहिए!';
-      btn.style.background = 'linear-gradient(135deg,#FF3366,#cc0033)';
       btn.disabled = false;
-      status.textContent = '❌ Server error: ' + (data.message || data.error || res.status) + ' — दोबारा कोशिश करें।';
+      btn.textContent = '🆘 आवाज़ दो';
+      status.textContent = '❌ Error: ' + (data.message || res.status);
     }
   } catch(e) {
-    btn.textContent = '🆘 आवाज़ दो — मदद चाहिए!';
-    btn.style.background = 'linear-gradient(135deg,#FF3366,#cc0033)';
     btn.disabled = false;
-    status.textContent = '❌ Connection error: ' + e.message + ' — इंटरनेट जाँचें।';
+    btn.textContent = '🆘 आवाज़ दो';
+    status.textContent = '❌ Connection error: ' + e.message;
   }
 }
 
 async function startVaultCamera() {
     const videoEl = document.getElementById('vaultPreview');
     const statusEl = document.getElementById('vaultStatus');
-    const recBtn = document.getElementById('recVaultBtn');
-    const startBtn = document.getElementById('startVaultBtn');
-    
     if (!videoEl || !statusEl) return;
-
     try {
         vaultStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         videoEl.srcObject = vaultStream;
         videoEl.style.display = 'block';
-        statusEl.textContent = '🟢 कैमरा सक्रिय है। क्लाउड-बीम चालू।';
-        if (recBtn) recBtn.style.display = 'inline-block';
-        if (startBtn) startBtn.style.display = 'none';
+        statusEl.textContent = '🟢 कैमरा सक्रिय है।';
     } catch (err) {
         statusEl.textContent = '❌ कैमरा अनुमति दें।';
-        console.error("Camera error: ", err.message);
     }
 }
 
 function toggleVaultRecording() {
-    const recBtn = document.getElementById('recVaultBtn');
     const statusEl = document.getElementById('vaultStatus');
     const videoEl = document.getElementById('vaultPreview');
-    
     if (!videoEl || !statusEl) return;
 
     if (vaultRecorder && vaultRecorder.state === "recording") {
         clearInterval(beamInterval); 
         vaultRecorder.stop(); 
-        if (recBtn) recBtn.textContent = "⏺️ साक्ष्य रिकॉर्ड करें";
         if (vaultStream) { vaultStream.getTracks().forEach(t => t.stop()); }
         videoEl.style.display = 'none';
-        const startBtn = document.getElementById('startVaultBtn');
-        if (startBtn) startBtn.style.display = 'inline-block';
-        if (recBtn) recBtn.style.display = 'none';
     } else {
         if (!vaultStream) return;
         vaultChunks = [];
         vaultRecorder = new MediaRecorder(vaultStream, { mimeType: 'video/webm' });
         vaultRecorder.ondataavailable = (e) => { if (e.data.size > 0) vaultChunks.push(e.data); };
-        vaultRecorder.onstop = () => {
-            const blob = new Blob(vaultChunks, { type: 'video/webm' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'evidence_' + Date.now() + '.webm';
-            a.click();
-        };
         vaultRecorder.start();
         beamInterval = setInterval(snapAndBeam, 3000); 
-        if (recBtn) recBtn.textContent = "⏹️ रिकॉर्डिंग रोकें";
-        statusEl.textContent = "🔴 साक्ष्य क्लाउड में जा रहा है...";
+        statusEl.textContent = "🔴 साक्ष्य सुरक्षित किया जा रहा है...";
     }
 }
 
@@ -1206,29 +1230,8 @@ async function snapAndBeam() {
         const formData = new FormData();
         formData.append('chat_id', TELEGRAM_CHAT_ID);
         formData.append('photo', blob, 'frame.jpg');
-        formData.append('caption', '⚠️ LIVE EVIDENCE: ' + new Date().toLocaleTimeString());
+        formData.append('caption', '⚠️ LIVE SECURE EVIDENCE BEAM');
         try { await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: formData }); } catch (err) {}
     }, 'image/jpeg', 0.5); 
 }
-
-  // ==========================================
-// THE SWITCHBOARD FUNCTION (FIXES BUTTONS)
-// ==========================================
-function showPage(pageId) {
-    // 1. Find all sections on your app (form, quiz, chatbot, etc.)
-    const panels = document.querySelectorAll('.page, .card, section, div[id]');
-    
-    // 2. Hide all of them instantly
-    panels.forEach(panel => {
-        // Only hide sections that are meant to be full pages
-        if(panel.id === 'awaaz-form-fields' || panel.id === 'awaaz-success' || panel.id.includes('page') || panel.id.includes('quiz') || panel.id.includes('chat')) {
-            panel.style.display = 'none';
-        }
-    });
-
-    // 3. Make the specific page you clicked reappear!
-    const activePanel = document.getElementById(pageId);
-    if (activePanel) {
-        activePanel.style.display = 'block';
-    }
-}
+</script>
