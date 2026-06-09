@@ -1102,6 +1102,7 @@ const phoneNumbers = Array.isArray(awaazRegistration.contacts)
 ? awaazRegistration.contacts.join(",")
 : awaazRegistration.contacts;
 
+```
 const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
