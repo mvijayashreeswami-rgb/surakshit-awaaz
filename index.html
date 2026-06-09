@@ -1124,14 +1124,17 @@ if(res.ok && data.success){
   status.textContent='❌ Server error: '+(data.message||data.error||res.status)+' — दोबारा कोशिश करें।';
 }
 ```
-
 }catch(e){
+console.error("AWAAZ ERROR:", e);
+console.error("STACK:", e?.stack);
+
 btn.textContent='🆘 आवाज़ दो — मदद चाहिए!';
 btn.style.background='linear-gradient(135deg,#FF3366,#cc0033)';
 btn.disabled=false;
 status.textContent='❌ Connection error: '+e.message+' — इंटरनेट जाँचें।';
 }
 }
+
 // ==========================================
 // EVIDENCE VAULT ENGINE
 // ==========================================
