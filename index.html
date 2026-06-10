@@ -1099,43 +1099,36 @@ async function triggerAwaazDo(){
   status.textContent = '🔄 आपके contacts को alert किया जा रहा है...';
 
   try {
-    // Correctly passing the array of numbers to match your backend
     const contactNumbers = Array.isArray(awaazRegistration.contacts) 
       ? awaazRegistration.contacts 
       : [awaazRegistration.contacts];
 
-    const res = await fetch('[https://surakshit-awaaz-server-production.up.railway.app/api/sos](https://surakshit-awaaz-server-production.up.railway.app/api/sos)', {
+    const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ numbers: contactNumbers })
     });
 
     let data;
-    try { 
-      data = await res.json(); 
-    } catch(e) { 
-      data = {}; 
-    }
+    try { data = await res.json(); } catch(e) { data = {}; }
 
     if(res.ok) {
       btn.textContent = '✅ SMS भेज दिया गया!';
       btn.style.background = 'linear-gradient(135deg,#00A86B,#006B44)';
       status.textContent = '✅ आपके contacts को SMS मिल गया। मदद आ रही है!';
     } else {
+      btn.disabled = false;
       btn.textContent = '🆘 आवाज़ दो — मदद चाहिए!';
       btn.style.background = 'linear-gradient(135deg,#FF3366,#cc0033)';
-      btn.disabled = false;
-      status.textContent = '❌ Server error: ' + (data.message || data.error || res.status) + ' — दोबारा कोशिश करें।';
+      status.textContent = '❌ Server error: ' + res.status;
     }
   } catch(e) {
-    console.error("AWAAZ ERROR:", e);
+    btn.disabled = false;
     btn.textContent = '🆘 आवाज़ दो — मदद चाहिए!';
     btn.style.background = 'linear-gradient(135deg,#FF3366,#cc0033)';
-    btn.disabled = false;
-    status.textContent = '❌ Connection error: ' + e.message + ' — इंटरनेट जाँचें।';
+    status.textContent = '❌ Connection error: इंटरनेट या सर्वर जांचें।';
   }
 }
-
 // ==========================================
 // EVIDENCE VAULT ENGINE
 // ==========================================
