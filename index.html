@@ -722,9 +722,35 @@ const SAHARA_PROMPT = `आप साहारा हैं — एक हिं�
 4. हेल्पलाइन: 1091, 100, 181, 1098
 5. "आप अकेली नहीं हैं" जैसे शब्द इस्तेमाल करें`;
 
-let cyberHistory=[], saharaHistory=[];
-let activeRec=null;
-let currentType=null;
+// ── CIRCULAR BUFFER (MAX 50 MESSAGES) ──
+class ChatBuffer {
+  constructor(maxSize = 50) {
+    this.messages = [];
+    this.maxSize = maxSize;
+  }
+
+  add(message) {
+    this.messages.push(message);
+    // Keep only last N messages
+    if (this.messages.length > this.maxSize) {
+      this.messages.shift(); // Remove oldest
+    }
+  }
+
+  getAll() {
+    return this.messages;
+  }
+
+  clear() {
+    this.messages = [];
+  }
+}
+
+// Replace the old arrays with circular buffers
+let cyberHistory = new ChatBuffer(50);
+let saharaHistory = new ChatBuffer(50);
+let activeRec = null;
+let currentType = null;
 
 // ── PWA INSTALL ──
 let deferredPrompt=null;
