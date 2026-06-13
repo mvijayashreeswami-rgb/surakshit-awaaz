@@ -1139,6 +1139,17 @@ async function triggerAwaazDo() {
         status.textContent = '❌ Error: सर्वर कनेक्शन विफल रहा।';
     }
 }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (awaazRegistration && awaazRegistration.contacts) {
+        const formFields = document.getElementById('awaaz-form-fields');
+        const successMessage = document.getElementById('awaaz-success');
+        
+        if (formFields) formFields.style.display = 'none';
+        if (successMessage) successMessage.style.display = 'block';
+      console.log("वेलकम बैक! आपकी सेव की हुई कांटेक्ट लिस्ट लोड हो चुकी है।");
+        
+    }
+});
 // ==========================================
 // EVIDENCE VAULT ENGINE
 // ==========================================
