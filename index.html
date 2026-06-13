@@ -1055,7 +1055,8 @@ send.disabled=false;
 }
 
 // Store registered data for Awaaz Do
-let awaazRegistration = null;
+// This checks the phone's memory first. If nothing is saved, only then it sets to null.
+let awaazRegistration = JSON.parse(localStorage.getItem('awaazRegistrationData')) || null;
 
 function submitAwaazForm(){
 const name=document.getElementById('af-name').value.trim();
@@ -1077,6 +1078,7 @@ return;
 }
 errEl.style.display='none';
 awaazRegistration={name,phone,address,contacts:[c1,c2,c3]};
+localStorage.setItem('awaazRegistrationData', JSON.stringify(awaazRegistration));
 document.getElementById('awaaz-form-fields').style.display='none';
 document.getElementById('awaaz-success').style.display='block';
 }
