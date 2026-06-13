@@ -1054,31 +1054,40 @@ addMsg(chatId,'❌ नेटवर्क की समस्या है। इ
 send.disabled=false;
 }
 
-// Store registered data for Awaaz Do
-let awaazRegistration = null;
+// FIX: Pull data from localStorage immediately so it doesn't reset to null on refresh
+let awaazRegistration = JSON.parse(localStorage.getItem('awaazReg')) || null;
 
-function submitAwaazForm(){
-const name=document.getElementById('af-name').value.trim();
-const phone=document.getElementById('af-phone').value.trim();
-const address=document.getElementById('af-address').value.trim();
-const c1=document.getElementById('af-c1').value.trim();
-const c2=document.getElementById('af-c2').value.trim();
-const c3=document.getElementById('af-c3').value.trim();
-const errEl=document.getElementById('awaaz-error');
-if(!name||!phone||!address||!c1||!c2||!c3){
-errEl.style.display='block';
-errEl.textContent='⚠️ कृपया सभी जानकारी भरें — सभी fields ज़रूरी हैं।';
-return;
-}
-if(phone.length<10||isNaN(phone)){
-errEl.style.display='block';
-errEl.textContent='⚠️ कृपया सही 10 अंकों का फोन नंबर दर्ज करें।';
-return;
-}
-errEl.style.display='none';
-awaazRegistration={name,phone,address,contacts:[c1,c2,c3]};
-document.getElementById('awaaz-form-fields').style.display='none';
-document.getElementById('awaaz-success').style.display='block';
+function submitAwaazForm(e){
+  // Prevent form submission from reloading the page and clearing state
+  if(e) e.preventDefault(); 
+  
+  const name=document.getElementById('af-name').value.trim();
+  const phone=document.getElementById('af-phone').value.trim();
+  const address=document.getElementById('af-address').value.trim();
+  const c1=document.getElementById('af-c1').value.trim();
+  const c2=document.getElementById('af-c2').value.trim();
+  const c3=document.getElementById('af-c3').value.trim();
+  const errEl=document.getElementById('awaaz-error');
+  
+  if(!name||!phone||!address||!c1||!c2||!c3){
+    errEl.style.display='block';
+    errEl.textContent='⚠️ कृपया सभी जानकारी भरें — सभी fields ज़रूरी हैं।';
+    return;
+  }
+  if(phone.length<10||isNaN(phone)){
+    errEl.style.display='block';
+    errEl.textContent='⚠️ कृपया सही 10 अंकों का फोन नंबर दर्ज करें।';
+    return;
+  }
+  
+  errEl.style.display='none';
+  awaazRegistration={name,phone,address,contacts:[c1,c2,c3]};
+  
+  // FIX: Save registration data persistently so the button can access it after reload
+  localStorage.setItem('awaazReg', JSON.stringify(awaazRegistration));
+  
+  document.getElementById('awaaz-form-fields').style.display='none';
+  document.getElementById('awaaz-success').style.display='block';
 }
 
 async function triggerAwaazDo(){
@@ -1119,6 +1128,7 @@ async function triggerAwaazDo(){
       ? awaazRegistration.contacts 
       : [awaazRegistration.contacts];
 
+    // Security Notice: Relaying directly to your backend endpoint to abstract keys
     const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1127,9 +1137,6 @@ async function triggerAwaazDo(){
           location: locationData
         })
     });
-
-    let data;
-    try { data = await res.json(); } catch(e) { data = {}; }
 
     if(res.ok) {
       btn.textContent = '✅ SMS भेज दिया गया!';
@@ -1149,72 +1156,73 @@ async function triggerAwaazDo(){
   }
 }
 
-const TELEGRAM_TOKEN = "8924617309:AAFvoYjyHWkrAOzB1VFjza0g9Yl2z2-DT4U";
-const TELEGRAM_CHAT_ID = "6683926456";
-
+// Security Notice: These processing pipelines now safely proxy to your Railway backend
 let vaultStream = null;
 let vaultRecorder = null;
 let vaultChunks = [];
 let beamInterval = null;
 
 async function startVaultCamera() {
-const videoEl = document.getElementById('vaultPreview');
-const statusEl = document.getElementById('vaultStatus');
-const recBtn = document.getElementById('recVaultBtn');
-const startBtn = document.getElementById('startVaultBtn');
-try {
-vaultStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-videoEl.srcObject = vaultStream;
-videoEl.style.display = 'block';
-statusEl.textContent = '🟢 कैमरा सक्रिय है। क्लाउड-बीम चालू।';
-recBtn.style.display = 'inline-block';
-startBtn.style.display = 'none';
-} catch (err) {
-statusEl.textContent = '❌ कैमरा अनुमति दें।';
-}
+  const videoEl = document.getElementById('vaultPreview');
+  const statusEl = document.getElementById('vaultStatus');
+  const recBtn = document.getElementById('recVaultBtn');
+  const startBtn = document.getElementById('startVaultBtn');
+  try {
+    vaultStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    videoEl.srcObject = vaultStream;
+    videoEl.style.display = 'block';
+    statusEl.textContent = '🟢 कैमरा सक्रिय है। क्लाउड-बीम चालू।';
+    recBtn.style.display = 'inline-block';
+    startBtn.style.display = 'none';
+  } catch (err) {
+    statusEl.textContent = '❌ कैमरा अनुमति दें।';
+  }
 }
 
 function toggleVaultRecording() {
-const recBtn = document.getElementById('recVaultBtn');
-const statusEl = document.getElementById('vaultStatus');
-const videoEl = document.getElementById('vaultPreview');
-if (vaultRecorder && vaultRecorder.state === "recording") {
-clearInterval(beamInterval);
-vaultRecorder.stop();
-recBtn.textContent = "⏺️ साक्ष्य रिकॉर्ड करें";
-if(vaultStream) { vaultStream.getTracks().forEach(t => t.stop()); }
-videoEl.style.display = 'none';
-document.getElementById('startVaultBtn').style.display = 'inline-block';
-recBtn.style.display = 'none';
-} else {
-vaultChunks = [];
-vaultRecorder = new MediaRecorder(vaultStream, { mimeType: 'video/webm' });
-vaultRecorder.ondataavailable = (e) => { if (e.data.size > 0) vaultChunks.push(e.data); };
-vaultRecorder.onstop = () => {
-const blob = new Blob(vaultChunks, { type: 'video/webm' });
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url; a.download = 'evidence_' + Date.now() + '.webm';
-a.click();
-};
-vaultRecorder.start();
-beamInterval = setInterval(snapAndBeam, 3000);
-recBtn.textContent = "⏹️ रिकॉर्डिंग रोकें";
-statusEl.textContent = "🔴 साक्ष्य क्लाउड में जा रहा है...";
-}
+  const recBtn = document.getElementById('recVaultBtn');
+  const statusEl = document.getElementById('vaultStatus');
+  const videoEl = document.getElementById('vaultPreview');
+  if (vaultRecorder && vaultRecorder.state === "recording") {
+    clearInterval(beamInterval);
+    vaultRecorder.stop();
+    recBtn.textContent = "⏺️ साक्ष्य रिकॉर्ड करें";
+    if(vaultStream) { vaultStream.getTracks().forEach(t => t.stop()); }
+    videoEl.style.display = 'none';
+    document.getElementById('startVaultBtn').style.display = 'inline-block';
+    recBtn.style.display = 'none';
+  } else {
+    vaultChunks = [];
+    vaultRecorder = new MediaRecorder(vaultStream, { mimeType: 'video/webm' });
+    vaultRecorder.ondataavailable = (e) => { if (e.data.size > 0) vaultChunks.push(e.data); };
+    vaultRecorder.onstop = () => {
+      const blob = new Blob(vaultChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'evidence_' + Date.now() + '.webm';
+      a.click();
+    };
+    vaultRecorder.start();
+    beamInterval = setInterval(snapAndBeam, 3000);
+    recBtn.textContent = "⏹️ रिकॉर्डिंग रोकें";
+    statusEl.textContent = "🔴 साक्ष्य क्लाउड में जा रहा है...";
+  }
 }
 
 async function snapAndBeam() {
-const video = document.getElementById('vaultPreview');
-if (!video || video.style.display === 'none') return;
-const canvas = document.createElement('canvas');
-canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-canvas.getContext('2d').drawImage(video, 0, 0);
-canvas.toBlob(async (blob) => {
-const formData = new FormData();
-formData.append('chat_id', TELEGRAM_CHAT_ID);
-formData.append('photo', blob, 'frame.jpg');
-formData.append('caption', '⚠️ LIVE EVIDENCE: ' + new Date().toLocaleTimeString());
-try { await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: formData }); } catch (err) {}
-}, 'image/jpeg', 0.5);
+  const video = document.getElementById('vaultPreview');
+  if (!video || video.style.display === 'none') return;
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  canvas.toBlob(async (blob) => {
+    const formData = new FormData();
+    formData.append('photo', blob, 'frame.jpg');
+    try { 
+      await fetch(`https://surakshit-awaaz-server-production.up.railway.app/api/vault-upload`, { 
+        method: 'POST', 
+        body: formData 
+      }); 
+    } catch (err) {}
+  }, 'image/jpeg', 0.5);
 }
