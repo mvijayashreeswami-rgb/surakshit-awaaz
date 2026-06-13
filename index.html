@@ -1097,6 +1097,23 @@ async function triggerAwaazDo(){
   btn.style.background = '#333';
   status.textContent = '🔄 आपके contacts को alert किया जा रहा है...';
 
+  let locationData = { latitude: "Unknown", longitude: "Unknown" };
+
+  if (navigator.geolocation) {
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 5000
+        });
+      });
+      locationData.latitude = position.coords.latitude;
+      locationData.longitude = position.coords.longitude;
+    } catch (error) {
+      console.log("Location access unavailable.");
+    }
+  }
+
   try {
     const contactNumbers = Array.isArray(awaazRegistration.contacts) 
       ? awaazRegistration.contacts 
@@ -1105,7 +1122,10 @@ async function triggerAwaazDo(){
     const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numbers: contactNumbers })
+        body: JSON.stringify({ 
+          numbers: contactNumbers,
+          location: locationData
+        })
     });
 
     let data;
@@ -1128,9 +1148,7 @@ async function triggerAwaazDo(){
     status.textContent = '❌ Connection error: इंटरनेट या सर्वर जांचें।';
   }
 }
-// ==========================================
-// EVIDENCE VAULT ENGINE
-// ==========================================
+
 const TELEGRAM_TOKEN = "8924617309:AAFvoYjyHWkrAOzB1VFjza0g9Yl2z2-DT4U";
 const TELEGRAM_CHAT_ID = "6683926456";
 
@@ -1200,4 +1218,3 @@ formData.append('caption', '⚠️ LIVE EVIDENCE: ' + new Date().toLocaleTimeStr
 try { await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: formData }); } catch (err) {}
 }, 'image/jpeg', 0.5);
 }
-</script>V
