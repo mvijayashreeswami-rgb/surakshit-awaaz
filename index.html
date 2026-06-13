@@ -1081,52 +1081,61 @@ document.getElementById('awaaz-form-fields').style.display='none';
 document.getElementById('awaaz-success').style.display='block';
 }
 
-async function triggerAwaazDo(){
-  const btn = document.getElementById('awaazDoBtn');
-  const status = document.getElementById('awaazDoStatus');
-  
-  if(!btn || !status) return;
+async function triggerAwaazDo() {
+    const btn = document.getElementById('awaazDoBtn');
+    const status = document.getElementById('awaazDoStatus');
+    
+    if(!btn || !status) return;
 
-  if(!awaazRegistration || !awaazRegistration.contacts){
-    status.textContent = '❌ पहले रजिस्टर करें।';
-    return;
-  }
+    btn.disabled = true;
+    btn.textContent = '⏳ SMS भेजा जा रहा है...';
+    status.textContent = '🔄 आपके contacts को alert किया जा रहा है...';
 
-  btn.disabled = true;
-  btn.textContent = '⏳ SMS भेजा जा रहा है...';
-  btn.style.background = '#333';
-  status.textContent = '🔄 आपके contacts को alert किया जा रहा है...';
+    // 1. CREATE DEFAULT FALLBACK LOCATION
+    let locationData = { latitude: "Unknown", longitude: "Unknown" };
 
-  try {
-    const contactNumbers = Array.isArray(awaazRegistration.contacts) 
-      ? awaazRegistration.contacts 
-      : [awaazRegistration.contacts];
-
-    const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numbers: contactNumbers })
-    });
-
-    let data;
-    try { data = await res.json(); } catch(e) { data = {}; }
-
-    if(res.ok) {
-      btn.textContent = '✅ SMS भेज दिया गया!';
-      btn.style.background = 'linear-gradient(135deg,#00A86B,#006B44)';
-      status.textContent = '✅ आपके contacts को SMS मिल गया। मदद आ रही है!';
-    } else {
-      btn.disabled = false;
-      btn.textContent = '🆘 आवाज़ दो — मदद चाहिए!';
-      btn.style.background = 'linear-gradient(135deg,#FF3366,#cc0033)';
-      status.textContent = '❌ Server error: ' + res.status;
+    // 2. FETCH REAL GPS COORDINATES FROM THE DEVICE
+    if (navigator.geolocation) {
+        try {
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: false, // Fast Wi-Fi/Cell tower lookup
+                    timeout: 8000              // Gives the hardware 8 seconds to respond
+                });
+            });
+            locationData.latitude = position.coords.latitude;
+            locationData.longitude = position.coords.longitude;
+        } catch (error) {
+            console.log("Hardware GPS timed out or was unavailable. Using fallbacks.");
+        }
     }
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = '🆘 आवाज़ दो — मदद चाहिए!';
-    btn.style.background = 'linear-gradient(135deg,#FF3366,#cc0033)';
-    status.textContent = '❌ Connection error: इंटरनेट या सर्वर जांचें।';
-  }
+
+    // 3. SEND EVERYTHING TO YOUR RAILWAY SERVER
+    try {
+        const contactNumbers = Array.isArray(awaazRegistration?.contacts) 
+            ? awaazRegistration.contacts 
+            : [document.getElementById('af-c1')?.value, document.getElementById('af-c2')?.value, document.getElementById('af-c3')?.value].filter(Boolean);
+
+        const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                numbers: contactNumbers,
+                location: locationData // <-- This passes the actual coordinates to server.js
+            })
+        });
+
+        if(res.ok) {
+            btn.textContent = '✅ SMS भेज दिया गया!';
+            status.textContent = '✅ आपके contacts को SMS मिल गया। मदद आ रही है!';
+        } else {
+            throw new Error('Server error');
+        }
+    } catch(e) {
+        btn.disabled = false;
+        btn.textContent = '🆘 आवाज़ दो — मदद चाहिए!';
+        status.textContent = '❌ Error: सर्वर कनेक्शन विफल रहा।';
+    }
 }
 // ==========================================
 // EVIDENCE VAULT ENGINE
