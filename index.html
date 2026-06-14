@@ -1096,16 +1096,14 @@ async function triggerAwaazDo() {
     btn.textContent = '⏳ SMS भेजा जा रहा है...';
     status.textContent = '🔄 आपके contacts को alert किया जा रहा है...';
 
-    // 1. CREATE DEFAULT FALLBACK LOCATION
     let locationData = { latitude: "Unknown", longitude: "Unknown" };
 
-    // 2. FETCH REAL GPS COORDINATES FROM THE DEVICE
     if (navigator.geolocation) {
         try {
             const position = await new Promise((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject, {
-                    enableHighAccuracy: false, // Fast Wi-Fi/Cell tower lookup
-                    timeout: 8000              // Gives the hardware 8 seconds to respond
+                    enableHighAccuracy: false,
+                    timeout: 8000              
                 });
             });
             locationData.latitude = position.coords.latitude;
@@ -1115,7 +1113,6 @@ async function triggerAwaazDo() {
         }
     }
 
-    // 3. SEND EVERYTHING TO YOUR RAILWAY SERVER
     try {
         const contactNumbers = Array.isArray(awaazRegistration?.contacts) 
             ? awaazRegistration.contacts 
@@ -1126,7 +1123,8 @@ async function triggerAwaazDo() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 numbers: contactNumbers,
-                location: locationData // <-- This passes the actual coordinates to server.js
+                location: locationData,
+                name: awaazRegistration?.name || "एक यूजर"
             })
         });
 
@@ -1142,17 +1140,18 @@ async function triggerAwaazDo() {
         status.textContent = '❌ Error: सर्वर कनेक्शन विफल रहा।';
     }
 }
-  window.addEventListener('DOMContentLoaded', () => {
+
+window.addEventListener('DOMContentLoaded', () => {
     if (awaazRegistration && awaazRegistration.contacts) {
         const formFields = document.getElementById('awaaz-form-fields');
         const successMessage = document.getElementById('awaaz-success');
         
         if (formFields) formFields.style.display = 'none';
         if (successMessage) successMessage.style.display = 'block';
-      console.log("वेलकम बैक! आपकी सेव की हुई कांटेक्ट लिस्ट लोड हो चुकी है।");
-        
+        console.log("वेलकम बैक! आपकी सेव की हुई कांटेक्ट लिस्ट लोड हो चुकी है।");
     }
 });
+
 // ==========================================
 // EVIDENCE VAULT ENGINE
 // ==========================================
@@ -1165,64 +1164,63 @@ let vaultChunks = [];
 let beamInterval = null;
 
 async function startVaultCamera() {
-const videoEl = document.getElementById('vaultPreview');
-const statusEl = document.getElementById('vaultStatus');
-const recBtn = document.getElementById('recVaultBtn');
-const startBtn = document.getElementById('startVaultBtn');
-try {
-vaultStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-videoEl.srcObject = vaultStream;
-videoEl.style.display = 'block';
-statusEl.textContent = '🟢 कैमरा सक्रिय है। क्लाउड-बीम चालू।';
-recBtn.style.display = 'inline-block';
-startBtn.style.display = 'none';
-} catch (err) {
-statusEl.textContent = '❌ कैमरा अनुमति दें।';
-}
+    const videoEl = document.getElementById('vaultPreview');
+    const statusEl = document.getElementById('vaultStatus');
+    const recBtn = document.getElementById('recVaultBtn');
+    const startBtn = document.getElementById('startVaultBtn');
+    try {
+        vaultStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        videoEl.srcObject = vaultStream;
+        videoEl.style.display = 'block';
+        statusEl.textContent = '🟢 कैमरा सक्रिय है। क्लाउड-बीम चालू।';
+        recBtn.style.display = 'inline-block';
+        startBtn.style.display = 'none';
+    } catch (err) {
+        statusEl.textContent = '❌ कैमरा अनुमति दें।';
+    }
 }
 
 function toggleVaultRecording() {
-const recBtn = document.getElementById('recVaultBtn');
-const statusEl = document.getElementById('vaultStatus');
-const videoEl = document.getElementById('vaultPreview');
-if (vaultRecorder && vaultRecorder.state === "recording") {
-clearInterval(beamInterval);
-vaultRecorder.stop();
-recBtn.textContent = "⏺️ साक्ष्य रिकॉर्ड करें";
-if(vaultStream) { vaultStream.getTracks().forEach(t => t.stop()); }
-videoEl.style.display = 'none';
-document.getElementById('startVaultBtn').style.display = 'inline-block';
-recBtn.style.display = 'none';
-} else {
-vaultChunks = [];
-vaultRecorder = new MediaRecorder(vaultStream, { mimeType: 'video/webm' });
-vaultRecorder.ondataavailable = (e) => { if (e.data.size > 0) vaultChunks.push(e.data); };
-vaultRecorder.onstop = () => {
-const blob = new Blob(vaultChunks, { type: 'video/webm' });
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url; a.download = 'evidence_' + Date.now() + '.webm';
-a.click();
-};
-vaultRecorder.start();
-beamInterval = setInterval(snapAndBeam, 3000);
-recBtn.textContent = "⏹️ रिकॉर्डिंग रोकें";
-statusEl.textContent = "🔴 साक्ष्य क्लाउड में जा रहा है...";
-}
+    const recBtn = document.getElementById('recVaultBtn');
+    const statusEl = document.getElementById('vaultStatus');
+    const videoEl = document.getElementById('vaultPreview');
+    if (vaultRecorder && vaultRecorder.state === "recording") {
+        clearInterval(beamInterval);
+        vaultRecorder.stop();
+        recBtn.textContent = "⏺️ साक्ष्य रिकॉर्ड करें";
+        if(vaultStream) { vaultStream.getTracks().forEach(t => t.stop()); }
+        videoEl.style.display = 'none';
+        document.getElementById('startVaultBtn').style.display = 'inline-block';
+        recBtn.style.display = 'none';
+    } else {
+        vaultChunks = [];
+        vaultRecorder = new MediaRecorder(vaultStream, { mimeType: 'video/webm' });
+        vaultRecorder.ondataavailable = (e) => { if (e.data.size > 0) vaultChunks.push(e.data); };
+        vaultRecorder.onstop = () => {
+            const blob = new Blob(vaultChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'evidence_' + Date.now() + '.webm';
+            a.click();
+        };
+        vaultRecorder.start();
+        beamInterval = setInterval(snapAndBeam, 3000);
+        recBtn.textContent = "⏹️ रिकॉर्डिंग रोकें";
+        statusEl.textContent = "🔴 साक्ष्य क्लाउड में जा रहा है...";
+    }
 }
 
 async function snapAndBeam() {
-const video = document.getElementById('vaultPreview');
-if (!video || video.style.display === 'none') return;
-const canvas = document.createElement('canvas');
-canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-canvas.getContext('2d').drawImage(video, 0, 0);
-canvas.toBlob(async (blob) => {
-const formData = new FormData();
-formData.append('chat_id', TELEGRAM_CHAT_ID);
-formData.append('photo', blob, 'frame.jpg');
-formData.append('caption', '⚠️ LIVE EVIDENCE: ' + new Date().toLocaleTimeString());
-try { await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: formData }); } catch (err) {}
-}, 'image/jpeg', 0.5);
+    const video = document.getElementById('vaultPreview');
+    if (!video || video.style.display === 'none') return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append('chat_id', TELEGRAM_CHAT_ID);
+        formData.append('photo', blob, 'frame.jpg');
+        formData.append('caption', '⚠️ LIVE EVIDENCE: ' + new Date().toLocaleTimeString());
+        try { await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: formData }); } catch (err) {}
+    }, 'image/jpeg', 0.5);
 }
-</script>
