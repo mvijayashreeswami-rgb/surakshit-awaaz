@@ -1141,12 +1141,14 @@ async function triggerAwaazDo() {
             ? awaazRegistration.contacts 
             : [document.getElementById('af-c1')?.value, document.getElementById('af-c2')?.value, document.getElementById('af-c3')?.value].filter(Boolean);
 
-        const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
+      const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 numbers: contactNumbers,
-                location: locationData // <-- This passes the actual coordinates to server.js
+                location: locationData,
+                // 🟢 CRITICAL FIX: Pull the saved name from your registration data variable
+                name: (typeof awaazRegistration !== 'undefined' && awaazRegistration?.name) ? awaazRegistration.name : "एक यूजर"
             })
         });
 
