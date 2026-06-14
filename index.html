@@ -1136,21 +1136,34 @@ async function triggerAwaazDo() {
     }
 
     // 3. SEND EVERYTHING TO YOUR RAILWAY SERVER
-    try {
-        const contactNumbers = Array.isArray(awaazRegistration?.contacts) 
-            ? awaazRegistration.contacts 
-            : [document.getElementById('af-c1')?.value, document.getElementById('af-c2')?.value, document.getElementById('af-c3')?.value].filter(Boolean);
+   try {
+    // 1. First, try to grab the data from localStorage so it survives page reloads
+    const localData = JSON.parse(localStorage.getItem('awaazRegistrationData')) || {};
 
-      const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                numbers: contactNumbers,
-                location: locationData,
-                // 🟢 CRITICAL FIX: Pull the saved name from your registration data variable
-                name: (typeof awaazRegistration !== 'undefined' && awaazRegistration?.name) ? awaazRegistration.name : "एक यूजर"
-            })
-        });
+    // 2. Fallback check for numbers (Keep your original backup logic just in case)
+    const contactNumbers = Array.isArray(localData?.contacts) 
+        ? localData.contacts 
+        : (Array.isArray(awaazRegistration?.contacts) ? awaazRegistration.contacts : [
+            document.getElementById('af-c1')?.value, 
+            document.getElementById('af-c2')?.value, 
+            document.getElementById('af-c3')?.value
+          ].filter(Boolean));
+
+    // 3. BULLETPROOF NAME CHECK: Look in localStorage, then global variable, then input field, then fallback
+    const trueName = localData?.name 
+        || awaazRegistration?.name 
+        || document.getElementById('af-name')?.value?.trim() 
+        || "एक यूजर";
+
+    const res = await fetch('https://surakshit-awaaz-server-production.up.railway.app/api/sos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            numbers: contactNumbers,
+            location: locationData,
+            name: trueName // 🟢 NOW IT IS IMPOSSIBLE TO MISS THE NAME
+        })
+    });
 
         if(res.ok) {
             btn.textContent = '✅ SMS भेज दिया गया!';
