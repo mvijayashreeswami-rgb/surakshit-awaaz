@@ -26,12 +26,12 @@
 /* PAGE TRANSITIONS */
 .page{animation:none}
 .page.entering{animation:pageEnter 0.3s cubic-bezier(0.16,1,0.3,1) forwards}
-@keyframes pageEnter{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pageEnter{from{opacity:0;trans:translateY(20px)}to{opacity:1;trans:translateY(0)}}
 
 /* DAILY SAFETY TIP */
 .tip-section{background:linear-gradient(135deg,#1a0a00,#2a1000);color:white;border-top:3px solid #FF6B00}
 .tip-card{background:rgba(255,107,0,0.1);border:1px solid #FF6B0033;border-radius:20px;padding:24px;margin-top:32px;position:relative;overflow:hidden}
-.tip-card::before{content:'💡';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:60px;opacity:0.1}
+.tip-card::before{content:'💡';position:absolute;right:20px;top:50%;trans:translateY(-50%);font-size:60px;opacity:0.1}
 .tip-date{font-size:11px;color:#FF9500;font-weight:700;letter-spacing:1px;margin-bottom:8px}
 .tip-text{font-size:16px;color:white;line-height:1.7;font-weight:500}
 .tip-source{font-size:11px;color:#6b4a2a;margin-top:10px}
@@ -40,8 +40,8 @@
 .score-section{background:linear-gradient(135deg,#0a0a1f,#0d0d2a);color:white}
 .score-section .sec-desc{color:#a0a0b0}
 .score-intro{background:rgba(255,107,0,0.08);border:1px solid #FF6B0022;border-radius:20px;padding:24px;margin-top:32px;text-align:center}
-.score-start-btn{margin-top:16px;padding:14px 32px;background:linear-gradient(135deg,#FF6B00,#FF3366);color:white;border:none;border-radius:14px;font-family:'Noto Sans Devanagari',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px #FF6B0033;transition:transform 0.2s}
-.score-start-btn:hover{transform:translateY(-3px)}
+.score-start-btn{margin-top:16px;padding:14px 32px;background:linear-gradient(135deg,#FF6B00,#FF3366);color:white;border:none;border-radius:14px;font-family:'Noto Sans Devanagari',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px #FF6B0033;transition:trans 0.2s}
+.score-start-btn:hover{trans:translateY(-3px)}
 .score-quiz{display:none;margin-top:24px}
 .score-q{background:#13131f;border:1px solid #2a2a3a;border-radius:16px;padding:20px;margin-bottom:16px;animation:pageEnter 0.3s ease}
 .score-q-text{font-size:15px;color:white;margin-bottom:14px;line-height:1.6}
@@ -63,7 +63,7 @@
 /* MERA PEHLA SMARTPHONE */
 .phone-guide-section{background:#FFF0E8}
 .phone-guide-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:36px}
-.phone-guide-card{background:white;border-radius:18px;padding:22px 18px;border:1px solid #F0E8E0;transition:transform 0.3s;position:relative;overflow:hidden}
+.phone-guide-card{background:white;border-radius:18px;padding:22px 18px;border:1px solid #F0E8E0;transition:trans 0.3s;position:relative;overflow:hidden}
 .phone-guide-card:hover{transform:translateY(-5px)}
 .phone-guide-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
 .phone-guide-card:nth-child(1)::after{background:#FF6B00}
@@ -1061,31 +1061,51 @@ send.disabled=false;
 // This checks the phone's memory first. If nothing is saved, only then it sets to null.
 let awaazRegistration = JSON.parse(localStorage.getItem('awaazRegistrationData')) || null;
 
-function submitAwaazForm(){
-const name=document.getElementById('af-name').value.trim();
-const phone=document.getElementById('af-phone').value.trim();
-const address=document.getElementById('af-address').value.trim();
-const c1=document.getElementById('af-c1').value.trim();
-const c2=document.getElementById('af-c2').value.trim();
-const c3=document.getElementById('af-c3').value.trim();
-const errEl=document.getElementById('awaaz-error');
-if(!name||!phone||!address||!c1||!c2||!c3){
-errEl.style.display='block';
-errEl.textContent='⚠️ कृपया सभी जानकारी भरें — सभी fields ज़रूरी हैं।';
-return;
-}
-if(phone.length<10||isNaN(phone)){
-errEl.style.display='block';
-errEl.textContent='⚠️ कृपया सही 10 अंकों का फोन नंबर दर्ज करें।';
-return;
-}
-errEl.style.display='none';
-awaazRegistration={name,phone,address,contacts:[c1,c2,c3]};
-localStorage.setItem('awaazRegistrationData', JSON.stringify(awaazRegistration));
-document.getElementById('awaaz-form-fields').style.display='none';
-document.getElementById('awaaz-success').style.display='block';
-}
+function submitAwaazForm(event) {
+    if (event) event.preventDefault();
 
+    const name = document.getElementById('af-name').value.trim();
+    const phone = document.getElementById('af-phone').value.trim();
+    const address = document.getElementById('af-address').value.trim();
+    const c1 = document.getElementById('af-c1').value.trim();
+    const c2 = document.getElementById('af-c2').value.trim();
+    const c3 = document.getElementById('af-c3').value.trim();
+    const errEl = document.getElementById('awaaz-error');
+
+    if (!name || !phone || !address || !c1 || !c2 || !c3) {
+        errEl.style.display = 'block';
+        errEl.textContent = '⚠️ कृपया सभी जानकारी भरें — सभी fields ज़रूरी हैं।';
+        return;
+    }
+
+    if (phone.length < 10 || isNaN(phone)) {
+        errEl.style.display = 'block';
+        errEl.textContent = '⚠️ कृपया सही 10 अंकों का फोन नंबर दर्ज करें।';
+        return;
+    }
+
+    errEl.style.display = 'none';
+
+    // Formulate the complete registration database object
+    const registrationData = {
+        name: name,
+        phone: phone,
+        address: address,
+        contacts: [c1, c2, c3]
+    };
+
+    // Save it to localStorage under the exact key the SOS button reads
+    localStorage.setItem('awaazRegistrationData', JSON.stringify(registrationData));
+    
+    // Bind it globally to the window scope so the active session registers it instantly
+    window.awaazRegistration = registrationData;
+
+    // Toggle the display screens
+    document.getElementById('awaaz-form-fields').style.display = 'none';
+    document.getElementById('awaaz-success').style.display = 'block';
+
+    console.log("पंजीकरण सफल! Name locked:", name);
+}
 async function triggerAwaazDo() {
     const btn = document.getElementById('awaazDoBtn');
     const status = document.getElementById('awaazDoStatus');
