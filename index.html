@@ -1191,15 +1191,11 @@ async function triggerAwaazDo() {
 // ==========================================
 // EVIDENCE VAULT ENGINE
 // ==========================================
-const segment1 = "8541675621:"; 
-const segment2 = "AAFazzRXTrLZboF-p"; 
-const segment3 = "1s_PTtO3L3Cmuut-3A"; 
-
-const botToken = segment1 + segment2 + segment3;
+const TELEGRAM_BOT_TOKEN = 8541675621:AAFazzRXTrLZboF-p1s_PTtO3L3Cmuut-3A
 const TELEGRAM_CHAT_ID = "6683926456";
 
 let vaultStream = null;
-let vaultRecorder = null;
+let vaultRecorder = null; 
 let vaultChunks = [];
 let beamInterval = null;
 
