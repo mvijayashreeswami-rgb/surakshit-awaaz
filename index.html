@@ -1191,7 +1191,7 @@ async function triggerAwaazDo() {
 // ==========================================
 // EVIDENCE VAULT ENGINE
 // ==========================================
-const TELEGRAM_TOKEN = "8541675621:AAFazzRXTrLZboF-p1s_PTtO3L3Cmuut-3A";
+const TELEGRAM_TOKEN = "8924617309:AAFvoYjyHWkrAOzB1VFjza0g9Yl2z2-DT4U";
 const TELEGRAM_CHAT_ID = "6683926456";
 
 let vaultStream = null;
@@ -1247,31 +1247,17 @@ statusEl.textContent = "🔴 साक्ष्य क्लाउड में 
 }
 
 async function snapAndBeam() {
-    const video = document.getElementById('vaultPreview');
-    if (!video || video.style.display === 'none') return;
-    
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth; 
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    
-    canvas.toBlob(async (blob) => {
-        const formData = new FormData();
-        formData.append('chat_id', TELEGRAM_CHAT_ID);
-        formData.append('photo', blob, 'frame.jpg');
-        formData.append('caption', '⚠️ LIVE EVIDENCE: ' + new Date().toLocaleTimeString());
-        
-        try { 
-            const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { 
-                method: 'POST', 
-                body: formData 
-            }); 
-            
-            if (!response.ok) {
-                console.error("Telegram API Error:", await response.text());
-            }
-        } catch (err) { 
-            console.error("Critical Network/Fetch Failure:", err); 
-        }
-    }, 'image/jpeg', 0.8); // <--- This closes the toBlob() function
-} // <--- This closes the snapAndBeam() function
+const video = document.getElementById('vaultPreview');
+if (!video || video.style.display === 'none') return;
+const canvas = document.createElement('canvas');
+canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+canvas.getContext('2d').drawImage(video, 0, 0);
+canvas.toBlob(async (blob) => {
+const formData = new FormData();
+formData.append('chat_id', TELEGRAM_CHAT_ID);
+formData.append('photo', blob, 'frame.jpg');
+formData.append('caption', '⚠️ LIVE EVIDENCE: ' + new Date().toLocaleTimeString());
+try { await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: formData }); } catch (err) {}
+}, 'image/jpeg', 0.5);
+}
+</script>
