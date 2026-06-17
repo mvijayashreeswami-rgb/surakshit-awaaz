@@ -1247,26 +1247,31 @@ statusEl.textContent = "🔴 साक्ष्य क्लाउड में 
 }
 
 async function snapAndBeam() {
-const video = document.getElementById('vaultPreview');
-if (!video || video.style.display === 'none') return;
-const canvas = document.createElement('canvas');
-canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-canvas.getContext('2d').drawImage(video, 0, 0);
-canvas.toBlob(async (blob) => {
-const formData = new FormData();
-formData.append('chat_id', TELEGRAM_CHAT_ID);
-formData.append('photo', blob, 'frame.jpg');
-formData.append('caption', '⚠️ LIVE EVIDENCE: ' + new Date().toLocaleTimeString());
-try { 
-    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { 
-        method: 'POST', 
-        body: formData 
-    }); 
+    const video = document.getElementById('vaultPreview');
+    if (!video || video.style.display === 'none') return;
     
-    if (!response.ok) {
-        console.error("Telegram API Error:", await response.text());
-    }
-} catch (err) { 
-    console.error("Critical Network/Fetch Failure:", err); 
-}
-</script>
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth; 
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    
+    canvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append('chat_id', TELEGRAM_CHAT_ID);
+        formData.append('photo', blob, 'frame.jpg');
+        formData.append('caption', '⚠️ LIVE EVIDENCE: ' + new Date().toLocaleTimeString());
+        
+        try { 
+            const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { 
+                method: 'POST', 
+                body: formData 
+            }); 
+            
+            if (!response.ok) {
+                console.error("Telegram API Error:", await response.text());
+            }
+        } catch (err) { 
+            console.error("Critical Network/Fetch Failure:", err); 
+        }
+    }, 'image/jpeg', 0.8); // <--- This closes the toBlob() function
+} // <--- This closes the snapAndBeam() function
